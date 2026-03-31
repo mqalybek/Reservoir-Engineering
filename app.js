@@ -85,6 +85,13 @@ function showResults() {
     quizBox.classList.add('hidden');
     quizResultScreen.classList.remove('hidden');
     finalScoreEl.textContent = score;
+
+    // Сохранение Рангов (прогресс)
+    const currentMax = parseInt(localStorage.getItem('maxQuizScore') || '0');
+    if (score > currentMax) {
+        localStorage.setItem('maxQuizScore', score.toString());
+        updateRankUI();
+    }
 }
 
 if(btnStartQuiz) btnStartQuiz.addEventListener('click', startQuiz);
@@ -131,4 +138,107 @@ if(searchInput) {
 // Инициализация глоссария
 if(typeof glossaryData !== 'undefined') {
     renderGlossary(glossaryData);
+}
+
+// ================= ТЕМНАЯ ТЕМА =================
+const themeToggle = document.getElementById('theme-toggle');
+const currentTheme = localStorage.getItem('theme');
+
+if (currentTheme === 'dark') {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    if (themeToggle) themeToggle.checked = true;
+}
+
+if (themeToggle) {
+    themeToggle.addEventListener('change', (e) => {
+        if (e.target.checked) {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            localStorage.setItem('theme', 'dark');
+        } else {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('theme', 'light');
+        }
+    });
+}
+
+// ================= СИСТЕМА РАНГОВ =================
+function updateRankUI() {
+    const maxScore = parseInt(localStorage.getItem('maxQuizScore') || '0');
+    const rankText = document.getElementById('rank-text');
+    if (!rankText) return;
+
+    if (maxScore === 0) {
+        rankText.innerText = 'Новичок';
+    } else if (maxScore <= 10) {
+        rankText.innerText = 'Студент';
+    } else if (maxScore <= 20) {
+        rankText.innerText = 'Инженер';
+    } else if (maxScore <= 29) {
+        rankText.innerText = 'Главный геолог';
+    } else {
+        rankText.innerText = 'Эксперт 👑';
+    }
+}
+// Вызываем при загрузке
+updateRankUI();
+
+// ================= ФЛЭШ-КАРТОЧКИ =================
+let currentFlashcardIndex = 0;
+const fcTerm = document.getElementById('fc-term');
+const fcDef = document.getElementById('fc-def');
+const flashcard = document.getElementById('flashcard');
+const btnPrevCard = document.getElementById('btn-prev-card');
+const btnNextCard = document.getElementById('btn-next-card');
+
+function renderFlashcard(index) {
+    if (!fcTerm || typeof glossaryData === 'undefined') return;
+    flashcard.classList.remove('is-flipped');
+    setTimeout(() => {
+        fcTerm.innerText = glossaryData[index].term;
+        fcDef.innerText = glossaryData[index].definition;
+    }, 150);
+}
+
+if (flashcard && typeof glossaryData !== 'undefined') {
+    renderFlashcard(0);
+
+    flashcard.addEventListener('click', () => {
+        flashcard.classList.toggle('is-flipped');
+    });
+
+    btnPrevCard.addEventListener('click', () => {
+        currentFlashcardIndex = (currentFlashcardIndex - 1 + glossaryData.length) % glossaryData.length;
+        renderFlashcard(currentFlashcardIndex);
+    });
+
+    btnNextCard.addEventListener('click', () => {
+        currentFlashcardIndex = (currentFlashcardIndex + 1) % glossaryData.length;
+        renderFlashcard(currentFlashcardIndex);
+    });
+}
+
+// ================= КАЛЬКУЛЯТОРЫ =================
+const btnCalcStooip = document.getElementById('btn-calc-stooip');
+const btnCalcApi = document.getElementById('btn-calc-api');
+
+if (btnCalcStooip) {
+    btnCalcStooip.addEventListener('click', () => {
+        const A = parseFloat(document.getElementById('calc-area').value) || 0;
+        const h = parseFloat(document.getElementById('calc-h').value) || 0;
+        const poro = parseFloat(document.getElementById('calc-poro').value) || 0;
+        const So = parseFloat(document.getElementById('calc-so').value) || 0;
+        const Bo = parseFloat(document.getElementById('calc-bo').value) || 1;
+
+        const stooip = (7758 * A * h * poro * So) / Bo;
+        document.getElementById('res-stooip').innerText = Math.round(stooip).toLocaleString('ru-RU') + ' STB';
+    });
+}
+
+if (btnCalcApi) {
+    btnCalcApi.addEventListener('click', () => {
+        const api = parseFloat(document.getElementById('calc-api').value) || 10;
+        const sg = 141.5 / (api + 131.5);
+        const density = sg * 1000;
+        document.getElementById('res-api').innerText = density.toFixed(2) + ' кг/м³';
+    });
 }
