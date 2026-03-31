@@ -83,13 +83,35 @@
 
     <!-- Блок «Вопросы и Тесты» -->
     <section id="questions" class="section">
-        <div class="container">
-            <div class="interactive-banner">
+        <div class="container" id="quiz-container">
+            <div class="interactive-banner" id="quiz-start-screen">
                 <div class="banner__text">
                     <h2 class="banner__title">Проверь свою инженерную логику</h2>
-                    <p>Квизы и задачи по проектированию разработки, расчету дебита и выбору насосного оборудования.</p>
+                    <p>Пройди профессиональный тест из 20 вопросов по основам разработки нефтегазовых месторождений.</p>
                 </div>
-                <button class="btn btn--large btn--gold">Начать тест</button>
+                <button class="btn btn--large btn--gold" id="btn-start-quiz">Начать тест</button>
+            </div>
+            
+            <!-- Скрытый блок самого квиза -->
+            <div class="quiz-box hidden" id="quiz-box">
+                <div class="quiz__header">
+                    <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 20</span>
+                    <span class="quiz__score">Счет: <span id="quiz-score" style="color:var(--color-gold); font-weight:800;">0</span></span>
+                </div>
+                <h3 class="quiz__question" id="quiz-question">Текст вопроса...</h3>
+                <div class="quiz__options" id="quiz-options">
+                    <!-- Кнопки генерируются динамически -->
+                </div>
+                <div class="quiz__footer" style="text-align: right; margin-top:1rem;">
+                    <button class="btn btn--primary hidden" id="btn-next-question">Следующий вопрос →</button>
+                </div>
+            </div>
+
+            <!-- Экран результатов -->
+            <div class="quiz-result hidden" id="quiz-result-screen">
+                <h2 class="section__title">Результаты теста</h2>
+                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> из 20 вопросов.</p>
+                <button class="btn btn--outline" id="btn-restart-quiz">Пройти заново</button>
             </div>
         </div>
     </section>
@@ -100,24 +122,14 @@
             <h2 class="section__title">Глоссарий терминов</h2>
             <p class="section__subtitle">От А до Я. Быстрый поиск по терминам нефтяной отрасли.</p>
 
-            <div class="glossary-preview">
-                <div class="glossary-item">
-                    <span class="glossary-item__term">КИН</span>
-                    <span class="glossary-item__def">Коэффициент извлечения нефти — отношение извлечённых запасов к начальным геологическим.</span>
-                </div>
-                <div class="glossary-item">
-                    <span class="glossary-item__term">Скин-фактор</span>
-                    <span class="glossary-item__def">Показатель, характеризующий дополнительное фильтрационное сопротивление в призабойной зоне.</span>
-                </div>
-                <div class="glossary-item">
-                    <span class="glossary-item__term">Кривая падения добычи</span>
-                    <span class="glossary-item__def">Зависимость (Decline curve), отражающая снижение дебита скважины с течением времени.</span>
-                </div>
+            <div class="glossary-search">
+                <input type="text" id="glossary-search-input" placeholder="Введите термин для поиска (например, Скин-фактор)..." class="glossary__input">
+            </div>
+
+            <div class="glossary-grid" id="glossary-list">
+                <!-- Глоссарий генерируется динамически из файла data.js -->
             </div>
             
-            <div class="text-center mt-4">
-                <a href="#" class="btn btn--outline-gold">Смотреть весь глоссарий</a>
-            </div>
         </div>
     </section>
 
@@ -139,5 +151,7 @@
         </div>
     </footer>
 
+    <script src="data.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
