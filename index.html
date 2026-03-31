@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PetroLearn | Разработка месторождений</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- Шапка (Header) -->
+    <header class="header">
+        <div class="container header__container">
+            <a href="#" class="logo">
+                <span class="logo__highlight">Petro</span>Learn
+            </a>
+            <nav class="nav">
+                <a href="#theory" class="nav__link">Теория</a>
+                <a href="#questions" class="nav__link">Вопросы</a>
+                <a href="#glossary" class="nav__link">Глоссарий</a>
+            </nav>
+            <button class="btn btn--primary">Начать</button>
+        </div>
+    </header>
+
+    <!-- Главный экран (Hero Section) -->
+    <section class="hero">
+        <div class="container hero__container">
+            <div class="hero__content">
+                <span class="hero__label">Нефтяная инженерия</span>
+                <h1 class="hero__title">Разработка нефтяных и газовых месторождений</h1>
+                <p class="hero__description">
+                    Изучайте ключевые аспекты моделирования, бурения и эксплуатации скважин. 
+                    Интерактивные тесты и глубокая теория для инженеров.
+                </p>
+                <div class="hero__actions">
+                    <a href="#theory" class="btn btn--large btn--dark">Перейти к теории</a>
+                    <a href="#questions" class="btn btn--large btn--outline">Проверить знания</a>
+                </div>
+            </div>
+            <div class="hero__visual">
+                <div class="abstract-shape">
+                    <!-- Заглушка для красивой абстракции нефтяной вышки/капли/сетки моделирования -->
+                    <div class="shape shape--1"></div>
+                    <div class="shape shape--2"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Блок «Теория» -->
+    <section id="theory" class="section bg-light">
+        <div class="container">
+            <h2 class="section__title">Теоретический блок</h2>
+            <p class="section__subtitle">Основные дисциплины и фундаментальные знания.</p>
+            
+            <div class="grid cards-grid">
+                <!-- Карточка 1 -->
+                <article class="card">
+                    <div class="card__icon">01</div>
+                    <h3 class="card__title">Физика пласта</h3>
+                    <p class="card__text">Коллекторские свойства, пористость, проницаемость и фильтрация флюидов в пористой среде.</p>
+                    <a href="#" class="card__link">Изучить →</a>
+                </article>
+                <!-- Карточка 2 -->
+                <article class="card">
+                    <div class="card__icon">02</div>
+                    <h3 class="card__title">Моделирование месторождений</h3>
+                    <p class="card__text">Создание гидродинамических моделей, адаптация истории и прогнозирование добычи.</p>
+                    <a href="#" class="card__link">Изучить →</a>
+                </article>
+                <!-- Карточка 3 -->
+                <article class="card">
+                    <div class="card__icon">03</div>
+                    <h3 class="card__title">Системы поддержания пластового давления</h3>
+                    <p class="card__text">Методы заводнения, закачка газа и их влияние на коэффициент извлечения нефти.</p>
+                    <a href="#" class="card__link">Изучить →</a>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Блок «Вопросы и Тесты» -->
+    <section id="questions" class="section">
+        <div class="container">
+            <div class="interactive-banner">
+                <div class="banner__text">
+                    <h2 class="banner__title">Проверь свою инженерную логику</h2>
+                    <p>Квизы и задачи по проектированию разработки, расчету дебита и выбору насосного оборудования.</p>
+                </div>
+                <button class="btn btn--large btn--gold">Начать тест</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Блок «Глоссарий» -->
+    <section id="glossary" class="section bg-dark text-white">
+        <div class="container">
+            <h2 class="section__title">Глоссарий терминов</h2>
+            <p class="section__subtitle">От А до Я. Быстрый поиск по терминам нефтяной отрасли.</p>
+
+            <div class="glossary-preview">
+                <div class="glossary-item">
+                    <span class="glossary-item__term">КИН</span>
+                    <span class="glossary-item__def">Коэффициент извлечения нефти — отношение извлечённых запасов к начальным геологическим.</span>
+                </div>
+                <div class="glossary-item">
+                    <span class="glossary-item__term">Скин-фактор</span>
+                    <span class="glossary-item__def">Показатель, характеризующий дополнительное фильтрационное сопротивление в призабойной зоне.</span>
+                </div>
+                <div class="glossary-item">
+                    <span class="glossary-item__term">Кривая падения добычи</span>
+                    <span class="glossary-item__def">Зависимость (Decline curve), отражающая снижение дебита скважины с течением времени.</span>
+                </div>
+            </div>
+            
+            <div class="text-center mt-4">
+                <a href="#" class="btn btn--outline-gold">Смотреть весь глоссарий</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Подвал (Footer) -->
+    <footer class="footer">
+        <div class="container footer__container">
+            <div class="footer__brand">
+                <span class="logo__highlight">Petro</span>Learn
+                <p class="footer__credit">Образовательная платформа для инженеров-разработчиков.</p>
+            </div>
+            <div class="footer__links">
+                <a href="#theory">Теория</a>
+                <a href="#questions">Вопросы</a>
+                <a href="#glossary">Глоссарий</a>
+            </div>
+        </div>
+        <div class="footer__bottom">
+            <p>&copy; 2026 PetroLearn. Все права защищены.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
