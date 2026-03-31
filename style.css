@@ -223,44 +223,27 @@ a {
     gap: 1rem;
 }
 
-/* ВИЗУАЛЬНАЬЯ АБСТРАКЦИЯ В HERO (Имитация слоев/скважины) */
+/* ВИЗУАЛЬНАЬЯ АБСТРАКЦИЯ В HERO */
 .hero__visual {
     position: relative;
-    height: 400px;
     display: flex;
     align-items: center;
     justify-content: center;
 }
-.abstract-shape {
-    position: relative;
-    width: 300px;
-    height: 300px;
+.hero__image {
+    width: 100%;
+    max-width: 480px;
+    height: auto;
+    object-fit: cover;
+    border-radius: var(--border-radius);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+    animation: float 6s ease-in-out infinite;
 }
-.shape {
-    position: absolute;
-    border-radius: 50%;
-    border: 1px solid var(--color-gold);
-    opacity: 0.6;
-}
-.shape--1 {
-    width: 300px; height: 300px;
-    top: 0; left: 0;
-    border-width: 2px;
-}
-.shape--2 {
-    width: 200px; height: 200px;
-    top: 50px; left: 50px;
-    background-color: var(--color-dark);
-    border: none;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
-}
-.shape--2::after {
-    content: '';
-    position: абсолютная;
-    width: 2px;
-    height: 150px;
-    background-color: var(--color-gold);
-    top: 25px; left: 99px; /* Имитация ствола скважины */
+
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
 }
 
 /* БЛОК "ТЕОРИЯ" (КАРТОЧКИ) */
