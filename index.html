@@ -22,10 +22,6 @@
                 <a href="#questions" class="nav__link">Тесты</a>
                 <a href="#glossary" class="nav__link">Глоссарий</a>
                 <a href="#calculators" class="nav__link">Расчеты</a>
-                <label class="theme-switch" title="Переключить тему">
-                    <input type="checkbox" id="theme-toggle">
-                    <span class="slider round"></span>
-                </label>
             </nav>
             <a href="#questions" class="btn btn--primary">Начать</a>
         </div>
@@ -213,24 +209,32 @@
         </div>
     </section>
 
-    <!-- Блок «Скважина» -->
-    <section id="well-diagram" class="section" style="overflow: hidden;">
+    <!-- Блок «Формулы» -->
+    <section id="formulas" class="section">
         <div class="container text-center">
-            <h2 class="section__title">Устройство скважины</h2>
-            <p class="section__subtitle">Интерактивный разрез (наведите мышь на элементы для описания)</p>
+            <h2 class="section__title">Основные Формулы</h2>
+            <p class="section__subtitle">Ключевые уравнения разработки нефтяных и газовых месторождений.</p>
             
-            <div class="well-container">
-                <div class="well-part" data-tooltip="Устьевое оборудование (Фонтанная арматура). Осуществляет контроль давления и управление потоком флюида на поверхности.">
-                    <div class="well-tree">⚙️</div>
+            <div class="grid" style="text-align: left;">
+                <div class="card">
+                    <h3 class="card__title">Закон Дарси</h3>
+                    <div style="font-size: 1.25rem; font-family: monospace; background: var(--color-bg); padding: 1rem; border-radius: var(--border-radius); border: 1px solid #eaeaea; margin-bottom: 1rem; text-align: center; color: var(--color-gold); font-weight: 800;">Q = (k · A · ΔP) / (μ · L)</div>
+                    <p class="card__text">Расход (Q) при линейной фильтрации. <br>Где <b>k</b> — проницаемость, <b>A</b> — площадь, <b>ΔP</b> — перепад давления, <b>μ</b> — вязкость, <b>L</b> — длина.</p>
                 </div>
-                <div class="well-part casing" data-tooltip="Обсадная колонна (Casing). Стальная труба, защищающая стенки от обрушения и изолирующая водоносные горизонты.">
-                    <div class="tubing" data-tooltip="Насосно-компрессорная труба (НКТ / Tubing). По этой узкой трубе нефть поднимается на поверхность."></div>
+                <div class="card">
+                    <h3 class="card__title">Запасы STOOIP</h3>
+                    <div style="font-size: 1.25rem; font-family: monospace; background: var(--color-bg); padding: 1rem; border-radius: var(--border-radius); border: 1px solid #eaeaea; margin-bottom: 1rem; text-align: center; color: var(--color-gold); font-weight: 800;">N = (A · h · Φ · Sₒ) / Bₒ</div>
+                    <p class="card__text">Объемный метод подсчета.<br>Где <b>A</b> — площадь, <b>h</b> — толщина, <b>Φ</b> — пористость, <b>Sₒ</b> — нефтенасыщенность, <b>Bₒ</b> — объемный коэффициент.</p>
                 </div>
-                <div class="well-part reservoir-layer" data-tooltip="Продуктивный пласт (Reservoir). Горная порода-коллектор с определенной пористостью, насыщенная углеводородами.">
-                    <div class="casing-bottom">
-                        <div class="perfs left"></div>
-                        <div class="perfs right"></div>
-                    </div>
+                <div class="card">
+                    <h3 class="card__title">Индекс продуктивности (J)</h3>
+                    <div style="font-size: 1.25rem; font-family: monospace; background: var(--color-bg); padding: 1rem; border-radius: var(--border-radius); border: 1px solid #eaeaea; margin-bottom: 1rem; text-align: center; color: var(--color-gold); font-weight: 800;">J = Q / (P_r - P_wf)</div>
+                    <p class="card__text">Характеризует потенциал скважины.<br>Где <b>Q</b> — дебит, <b>P_r</b> — пластовое давление, <b>P_wf</b> — забойное давление.</p>
+                </div>
+                <div class="card">
+                    <h3 class="card__title">Материальный баланс</h3>
+                    <div style="font-size: 1.25rem; font-family: monospace; background: var(--color-bg); padding: 1rem; border-radius: var(--border-radius); border: 1px solid #eaeaea; margin-bottom: 1rem; text-align: center; color: var(--color-gold); font-weight: 800;">F = N · Eₒ + Wₑ</div>
+                    <p class="card__text">Закон сохранения массы для резервуара.<br>Где <b>F</b> — добыча флюидов, <b>N · Eₒ</b> — расширение углеводородов, <b>Wₑ</b> — вторжение вод.</p>
                 </div>
             </div>
         </div>

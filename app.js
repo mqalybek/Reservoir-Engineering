@@ -140,26 +140,7 @@ if(typeof glossaryData !== 'undefined') {
     renderGlossary(glossaryData);
 }
 
-// ================= ТЕМНАЯ ТЕМА =================
-const themeToggle = document.getElementById('theme-toggle');
-const currentTheme = localStorage.getItem('theme');
 
-if (currentTheme === 'dark') {
-    document.documentElement.setAttribute('data-theme', 'dark');
-    if (themeToggle) themeToggle.checked = true;
-}
-
-if (themeToggle) {
-    themeToggle.addEventListener('change', (e) => {
-        if (e.target.checked) {
-            document.documentElement.setAttribute('data-theme', 'dark');
-            localStorage.setItem('theme', 'dark');
-        } else {
-            document.documentElement.removeAttribute('data-theme');
-            localStorage.setItem('theme', 'light');
-        }
-    });
-}
 
 // ================= СИСТЕМА РАНГОВ =================
 function updateRankUI() {

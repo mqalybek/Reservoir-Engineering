@@ -15,15 +15,6 @@
     --transition: all 0.3s ease;
 }
 
-[data-theme="dark"] {
-    --color-bg: #121212;
-    --color-surface: #1E1E1E;
-    --color-text-main: #FFFFFF;
-    --color-text-muted: #AAAAAA;
-    
-    --color-dark: #FFFFFF;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -601,43 +592,7 @@ a {
     margin-left: 2rem;
 }
 
-.theme-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 24px;
-  margin-left: 1rem;
-}
-.theme-switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 24px;
-}
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
-}
-input:checked + .slider {
-  background-color: var(--color-gold);
-}
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
+
 
 /* --- ФЛЭШ-КАРТОЧКИ --- */
 .flashcard-container {
@@ -662,6 +617,7 @@ input:checked + .slider:before {
     width: 100%;
     height: 100%;
     position: absolute;
+    top: 0; left: 0;
     -webkit-backface-visibility: hidden;
     backface-visibility: hidden;
     display: flex;
@@ -673,19 +629,25 @@ input:checked + .slider:before {
     box-shadow: 0 10px 30px rgba(0,0,0,0.08);
     border: 2px solid var(--color-gold);
 }
+.flashcard-front {
+    z-index: 2;
+}
 .flashcard-front h3 {
     font-size: 1.8rem;
     color: var(--color-dark);
 }
 .flashcard-back {
     transform: rotateY(180deg);
-    background: var(--color-primary);
-    color: var(--color-surface);
+    background: #1A1A1A;
+    color: #FFFFFF;
     border: none;
+    z-index: 1;
 }
 .flashcard-back p {
     font-size: 1.1rem;
     line-height: 1.6;
+    max-height: 100%;
+    overflow-y: auto;
 }
 
 /* --- КАЛЬКУЛЯТОРЫ --- */
@@ -734,94 +696,7 @@ input:checked + .slider:before {
     border-radius: 4px;
 }
 
-/* --- СКВАЖИНА (WELL DIAGRAM) --- */
-.well-container {
-    width: 100%;
-    max-width: 400px;
-    margin: 2rem auto;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-.well-part {
-    position: relative;
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    cursor: help;
-}
-.well-part::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    left: 110%;
-    top: 50%;
-    transform: translateY(-50%);
-    background: var(--color-gold);
-    color: #000;
-    padding: 0.75rem;
-    border-radius: 4px;
-    font-size: 0.9rem;
-    width: 250px;
-    opacity: 0;
-    visibility: hidden;
-    transition: 0.3s;
-    z-index: 10;
-    font-weight: 600;
-    text-align: left;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-}
-.well-part:hover::after {
-    opacity: 1;
-    visibility: visible;
-}
-.well-tree {
-    font-size: 3rem;
-    background: #333;
-    width: 80px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 8px 8px 0 0;
-    border: 2px solid var(--color-gold);
-    color: transparent;
-    text-shadow: 0 0 0 #D4AF37;
-}
-.casing {
-    width: 60px;
-    height: 150px;
-    background: #555;
-    border-left: 5px solid #888;
-    border-right: 5px solid #888;
-}
-.tubing {
-    width: 20px;
-    height: 100%;
-    background: #111;
-    border: 2px dashed var(--color-gold);
-}
-.reservoir-layer {
-    background: repeating-linear-gradient(45deg, #8B6508, #8B6508 10px, #a87e12 10px, #a87e12 20px);
-    height: 120px;
-    width: 100%;
-    border-radius: 8px;
-    border-top: 5px solid #5a4005;
-}
-.casing-bottom {
-    width: 60px;
-    height: 100%;
-    background: #555;
-    position: relative;
-}
-.perfs {
-    position: absolute;
-    height: 60px;
-    width: 10px;
-    top: 30px;
-    background: repeating-linear-gradient(0deg, transparent, transparent 5px, var(--color-white) 5px, var(--color-white) 10px);
-}
-.perfs.left { left: -5px; }
-.perfs.right { right: -5px; }
+
 
 /* АДАПТИВНОСТЬ */
 @media (max-width: 768px) {
@@ -834,14 +709,7 @@ input:checked + .slider:before {
         flex-direction: column;
         gap: 0.5rem;
     }
-    .theme-switch { margin-top: 1rem; margin-left: 0;}
     .calc-grid { grid-template-columns: 1fr; }
-    .well-part::after {
-        left: 50%;
-        top: 100%;
-        transform: translateX(-50%);
-        z-index: 20;
-    }
     .hero__container { grid-template-columns: 1fr; text-align: center; }
     .hero__actions { justify-content: center; }
     .hero__visual { display: none; }
