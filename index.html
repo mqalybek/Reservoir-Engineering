@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetroLearn | Разработка месторождений</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <title>PetroLearn | Development & Reservoir Engineering</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -15,7 +15,7 @@
                 <span class="logo__highlight">Petro</span>Learn
             </a>
             <div class="header__user-info" id="user-rank-badge" title="Ваш ранг обновляется по результатам тестов">
-                <span class="rank-icon">👤</span> <span id="rank-text">Новичок</span>
+                <span class="text-gold">◈</span> <span id="rank-text">Новичок</span>
             </div>
             <nav class="nav">
                 <a href="#theory" class="nav__link">Теория</a>
@@ -23,23 +23,22 @@
                 <a href="#glossary" class="nav__link">Глоссарий</a>
                 <a href="#calculators" class="nav__link">Расчеты</a>
             </nav>
-            <a href="#questions" class="btn btn--primary">Начать</a>
         </div>
     </header>
 
     <!-- Главный экран (Hero Section) -->
-    <section class="hero">
+    <section class="hero fade-up">
         <div class="container hero__container">
             <div class="hero__content">
                 <span class="hero__label">Нефтяная инженерия</span>
-                <h1 class="hero__title">Разработка нефтяных и газовых месторождений</h1>
+                <h1 class="hero__title">Разработка нефтяных и газовых <span class="text-gold">месторождений</span></h1>
                 <p class="hero__description">
                     Изучайте ключевые аспекты моделирования, бурения и эксплуатации скважин. 
                     Интерактивные тесты и глубокая теория для инженеров.
                 </p>
                 <div class="hero__actions">
-                    <a href="#theory" class="btn btn--large btn--dark">Перейти к теории</a>
-                    <a href="#questions" class="btn btn--large btn--outline">Проверить знания</a>
+                    <a href="#theory" class="btn btn--primary btn--large">Перейти к теории</a>
+                    <a href="#questions" class="btn btn--outline btn--large">Проверить знания</a>
                 </div>
             </div>
             <div class="hero__visual">
@@ -47,13 +46,14 @@
                     <!-- Заглушка для красивой абстракции нефтяной вышки/капли/сетки моделирования -->
                     <div class="shape shape--1"></div>
                     <div class="shape shape--2"></div>
+                    <div class="shape shape--3"></div>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Блок «Теория» -->
-    <section id="theory" class="section bg-light">
+    <section id="theory" class="section fade-up">
         <div class="container">
             <h2 class="section__title">Теоретический конспект</h2>
             <p class="section__subtitle">Материал на базе вашего NotebookLM. Нажмите на раздел, чтобы раскрыть подробности.</p>
@@ -151,27 +151,27 @@
     </section>
 
     <!-- Блок «Вопросы и Тесты» -->
-    <section id="questions" class="section">
+    <section id="questions" class="section fade-up">
         <div class="container" id="quiz-container">
             <div class="interactive-banner" id="quiz-start-screen">
                 <div class="banner__text">
                     <h2 class="banner__title">Проверь свою инженерную логику</h2>
-                    <p>Пройди профессиональный тест из 20 вопросов по основам разработки нефтегазовых месторождений.</p>
+                    <p style="color:var(--color-text-muted); font-size:1.1rem; margin-top:0.5rem;">Пройди профессиональный тест по основам разработки нефтегазовых месторождений.</p>
                 </div>
-                <button class="btn btn--large btn--gold" id="btn-start-quiz">Начать тест</button>
+                <button class="btn btn--primary btn--large" id="btn-start-quiz">Начать испытание</button>
             </div>
             
             <!-- Скрытый блок самого квиза -->
             <div class="quiz-box hidden" id="quiz-box">
                 <div class="quiz__header">
-                    <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 20</span>
+                    <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 30</span>
                     <span class="quiz__score">Счет: <span id="quiz-score" style="color:var(--color-gold); font-weight:800;">0</span></span>
                 </div>
                 <h3 class="quiz__question" id="quiz-question">Текст вопроса...</h3>
                 <div class="quiz__options" id="quiz-options">
                     <!-- Кнопки генерируются динамически -->
                 </div>
-                <div class="quiz__footer" style="text-align: right; margin-top:1rem;">
+                <div class="quiz__footer" style="text-align: right; margin-top:2rem;">
                     <button class="btn btn--primary hidden" id="btn-next-question">Следующий вопрос →</button>
                 </div>
             </div>
@@ -179,17 +179,17 @@
             <!-- Экран результатов -->
             <div class="quiz-result hidden" id="quiz-result-screen">
                 <h2 class="section__title">Результаты теста</h2>
-                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> из 20 вопросов.</p>
+                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> вопросов.</p>
                 <button class="btn btn--outline" id="btn-restart-quiz">Пройти заново</button>
             </div>
         </div>
     </section>
 
     <!-- Блок «Флэш-карточки» -->
-    <section id="flashcards" class="section bg-light">
+    <section id="flashcards" class="section fade-up">
         <div class="container text-center">
-            <h2 class="section__title">Флэш-карточки Глоссария</h2>
-            <p class="section__subtitle">Переворачивайте карточки, чтобы запомнить терминологию нефтяной инженерии.</p>
+            <h2 class="section__title text-center">Глоссарий <span class="text-gold">Инженера</span></h2>
+            <p class="section__subtitle" style="margin: 0 auto 3rem auto;">Переворачивайте карточки, чтобы запомнить терминологию разработки месторождений.</p>
             
             <div class="flashcard-container">
                 <div class="flashcard" id="flashcard">
@@ -202,7 +202,7 @@
                 </div>
             </div>
             
-            <div class="flashcard-controls" style="margin-top: 2rem;">
+            <div class="flashcard-controls">
                 <button class="btn btn--outline" id="btn-prev-card">← Предыдущая</button>
                 <button class="btn btn--primary" id="btn-next-card">Следующая →</button>
             </div>
@@ -210,16 +210,16 @@
     </section>
 
     <!-- Блок «Калькуляторы» -->
-    <section id="calculators" class="section bg-light">
+    <section id="calculators" class="section fade-up">
         <div class="container text-center">
             <h2 class="section__title">Инженерные Расчеты</h2>
-            <p class="section__subtitle">Быстрые калькуляторы запасов и свойств пластовых флюидов.</p>
+            <p class="section__subtitle" style="margin: 0 auto 4rem auto;">Быстрые калькуляторы запасов и свойств пластовых флюидов.</p>
             
             <div class="calc-grid">
                 <!-- Калькулятор STOOIP -->
                 <div class="calc-card">
-                    <h3>Запасы нефти STOOIP</h3>
-                    <p style="font-size:0.9rem; margin-bottom:1rem; color:var(--color-gray);">Объемный метод подсчета запасов</p>
+                    <h3>Запасы STOOIP</h3>
+                    <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Объемный метод (Volumetric)</p>
                     <div class="form-group">
                         <label>Площадь (A), акры</label>
                         <input type="number" id="calc-area" value="1000">
@@ -240,39 +240,36 @@
                         <label>Объемный коэфф. (Bo), bbl/STB</label>
                         <input type="number" id="calc-bo" value="1.2" step="0.01">
                     </div>
-                    <button class="btn btn--primary" id="btn-calc-stooip" style="width:100%; margin-top:1rem;">Рассчитать STOOIP</button>
+                    <button class="btn btn--outline" id="btn-calc-stooip" style="width:100%; margin-top:1rem;">Рассчитать STOOIP</button>
                     <div class="calc-result" id="res-stooip">0 STB</div>
                 </div>
 
                 <!-- Конвертер API -->
                 <div class="calc-card">
-                    <h3>Плотность API → кг/м³</h3>
-                    <p style="font-size:0.9rem; margin-bottom:1rem; color:var(--color-gray);">Перевод API Gravity в стандартную плотность</p>
+                    <h3>API → Плотность</h3>
+                    <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Перевод API Gravity (США) в кг/м³ (СИ)</p>
                     <div class="form-group">
                         <label>API Gravity, °API</label>
                         <input type="number" id="calc-api" value="35">
                     </div>
-                    <button class="btn btn--outline" id="btn-calc-api" style="width:100%; margin-top:1rem;">Перевести плотность</button>
+                    <button class="btn btn--outline" id="btn-calc-api" style="width:100%; margin-top:1rem;">Конвертировать</button>
                     <div class="calc-result" id="res-api">0 кг/м³</div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Блок «Глоссарий» -->
-    <section id="glossary" class="section bg-dark text-white">
+    <!-- Блок «Глоссарий Поиск» -->
+    <section id="glossary" class="section fade-up" style="padding-top: 2rem;">
         <div class="container">
-            <h2 class="section__title">Глоссарий терминов</h2>
-            <p class="section__subtitle">От А до Я. Быстрый поиск по терминам нефтяной отрасли.</p>
-
+            <h2 class="section__title text-center">Справочник Терминов</h2>
             <div class="glossary-search">
-                <input type="text" id="glossary-search-input" placeholder="Введите термин для поиска (например, Скин-фактор)..." class="glossary__input">
+                <input type="text" id="glossary-search-input" placeholder="🔍 Введите термин для поиска (например, Скин-фактор)..." class="glossary__input">
             </div>
 
             <div class="glossary-grid" id="glossary-list">
                 <!-- Глоссарий генерируется динамически из файла data.js -->
             </div>
-            
         </div>
     </section>
 
@@ -280,17 +277,17 @@
     <footer class="footer">
         <div class="container footer__container">
             <div class="footer__brand">
-                <span class="logo__highlight">Petro</span>Learn
-                <p class="footer__credit">Образовательная платформа для инженеров-разработчиков.</p>
+                <span class="logo__highlight" style="font-size:1.5rem; font-weight:900;">Petro</span><span style="font-size:1.5rem; font-weight:900;">Learn</span>
+                <p class="footer__credit">Премиальная образовательная платформа для инженеров-разработчиков и геологов.</p>
             </div>
             <div class="footer__links">
                 <a href="#theory">Теория</a>
-                <a href="#questions">Вопросы</a>
-                <a href="#glossary">Глоссарий</a>
+                <a href="#questions">Тесты</a>
+                <a href="#glossary">Термины</a>
             </div>
         </div>
         <div class="footer__bottom">
-            <p>&copy; 2026 PetroLearn. Все права защищены.</p>
+            <p>&copy; 2026 PetroLearn. Все права защищены. Engineered for perfection.</p>
         </div>
     </footer>
 
