@@ -480,7 +480,7 @@ a {
     cursor: pointer;
 }
 .flashcard.is-flipped {
-    transform: rotateY(180deg);
+    transform: rotateY(-180deg);
 }
 .flashcard-front, .flashcard-back {
     width: 100%;
@@ -508,7 +508,7 @@ a {
     text-align: center;
 }
 .flashcard-back {
-    transform: rotateY(180deg);
+    transform: rotateY(-180deg);
     border-color: rgba(255,255,255,0.1);
     background: rgba(0,0,0,0.4);
 }
