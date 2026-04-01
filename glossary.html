@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetroLearn | Главная</title>
+    <title>PetroLearn | Глоссарий</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -20,37 +20,49 @@
                 <span class="text-gold">◈</span> <span id="rank-text">Новичок</span>
             </div>
             <nav class="nav">
-                <a href="index.html" class="nav__link active">Главная</a>
+                <a href="index.html" class="nav__link">Главная</a>
                 <a href="theory.html" class="nav__link">Теория</a>
                 <a href="tests.html" class="nav__link">Тесты</a>
-                <a href="glossary.html" class="nav__link">Глоссарий</a>
+                <a href="glossary.html" class="nav__link active">Глоссарий</a>
                 <a href="calculators.html" class="nav__link">Расчеты</a>
             </nav>
         </div>
     </header>
 
-    <!-- Главный экран (Hero Section) -->
-    <section class="hero fade-up">
-        <div class="container hero__container">
-            <div class="hero__content">
-                <span class="hero__label">Нефтяная инженерия</span>
-                <h1 class="hero__title">Разработка нефтяных и газовых <span class="text-gold">месторождений</span></h1>
-                <p class="hero__description">
-                    Изучайте ключевые аспекты моделирования, бурения и эксплуатации скважин. 
-                    Интерактивные тесты и глубокая теория для инженеров.
-                </p>
-                <div class="hero__actions">
-                    <a href="theory.html" class="btn btn--primary btn--large">Перейти к теории</a>
-                    <a href="tests.html" class="btn btn--outline btn--large">Проверить знания</a>
+    <!-- Блок «Флэш-карточки» -->
+    <section id="flashcards" class="section fade-up">
+        <div class="container text-center">
+            <h2 class="section__title text-center">Глоссарий <span class="text-gold">Инженера</span></h2>
+            <p class="section__subtitle" style="margin: 0 auto 3rem auto;">Переворачивайте карточки, чтобы запомнить терминологию разработки месторождений.</p>
+            
+            <div class="flashcard-container">
+                <div class="flashcard" id="flashcard">
+                    <div class="flashcard-front">
+                        <h3 id="fc-term">Загрузка...</h3>
+                    </div>
+                    <div class="flashcard-back">
+                        <p id="fc-def">Определение термина...</p>
+                    </div>
                 </div>
             </div>
-            <div class="hero__visual">
-                <div class="abstract-shape">
-                    <!-- Заглушка для красивой абстракции нефтяной вышки/капли/сетки моделирования -->
-                    <div class="shape shape--1"></div>
-                    <div class="shape shape--2"></div>
-                    <div class="shape shape--3"></div>
-                </div>
+            
+            <div class="flashcard-controls">
+                <button class="btn btn--outline" id="btn-prev-card">← Предыдущая</button>
+                <button class="btn btn--primary" id="btn-next-card">Следующая →</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Блок «Глоссарий Поиск» -->
+    <section id="glossary" class="section fade-up" style="padding-top: 2rem;">
+        <div class="container">
+            <h2 class="section__title text-center">Справочник Терминов</h2>
+            <div class="glossary-search">
+                <input type="text" id="glossary-search-input" placeholder="🔍 Введите термин для поиска (например, Скин-фактор)..." class="glossary__input">
+            </div>
+
+            <div class="glossary-grid" id="glossary-list">
+                <!-- Глоссарий генерируется динамически из файла data.js -->
             </div>
         </div>
     </section>

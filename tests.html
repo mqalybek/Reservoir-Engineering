@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PetroLearn | Главная</title>
+    <title>PetroLearn | Тесты</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
@@ -20,37 +20,46 @@
                 <span class="text-gold">◈</span> <span id="rank-text">Новичок</span>
             </div>
             <nav class="nav">
-                <a href="index.html" class="nav__link active">Главная</a>
+                <a href="index.html" class="nav__link">Главная</a>
                 <a href="theory.html" class="nav__link">Теория</a>
-                <a href="tests.html" class="nav__link">Тесты</a>
+                <a href="tests.html" class="nav__link active">Тесты</a>
                 <a href="glossary.html" class="nav__link">Глоссарий</a>
                 <a href="calculators.html" class="nav__link">Расчеты</a>
             </nav>
         </div>
     </header>
 
-    <!-- Главный экран (Hero Section) -->
-    <section class="hero fade-up">
-        <div class="container hero__container">
-            <div class="hero__content">
-                <span class="hero__label">Нефтяная инженерия</span>
-                <h1 class="hero__title">Разработка нефтяных и газовых <span class="text-gold">месторождений</span></h1>
-                <p class="hero__description">
-                    Изучайте ключевые аспекты моделирования, бурения и эксплуатации скважин. 
-                    Интерактивные тесты и глубокая теория для инженеров.
-                </p>
-                <div class="hero__actions">
-                    <a href="theory.html" class="btn btn--primary btn--large">Перейти к теории</a>
-                    <a href="tests.html" class="btn btn--outline btn--large">Проверить знания</a>
+    <!-- Блок «Вопросы и Тесты» -->
+    <section id="questions" class="section fade-up">
+        <div class="container" id="quiz-container">
+            <div class="interactive-banner" id="quiz-start-screen">
+                <div class="banner__text">
+                    <h2 class="banner__title">Проверь свою инженерную логику</h2>
+                    <p style="color:var(--color-text-muted); font-size:1.1rem; margin-top:0.5rem;">Пройди профессиональный тест по основам разработки нефтегазовых месторождений.</p>
+                </div>
+                <button class="btn btn--primary btn--large" id="btn-start-quiz">Начать испытание</button>
+            </div>
+            
+            <!-- Скрытый блок самого квиза -->
+            <div class="quiz-box hidden" id="quiz-box">
+                <div class="quiz__header">
+                    <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 30</span>
+                    <span class="quiz__score">Счет: <span id="quiz-score" style="color:var(--color-gold); font-weight:800;">0</span></span>
+                </div>
+                <h3 class="quiz__question" id="quiz-question">Текст вопроса...</h3>
+                <div class="quiz__options" id="quiz-options">
+                    <!-- Кнопки генерируются динамически -->
+                </div>
+                <div class="quiz__footer" style="text-align: right; margin-top:2rem;">
+                    <button class="btn btn--primary hidden" id="btn-next-question">Следующий вопрос →</button>
                 </div>
             </div>
-            <div class="hero__visual">
-                <div class="abstract-shape">
-                    <!-- Заглушка для красивой абстракции нефтяной вышки/капли/сетки моделирования -->
-                    <div class="shape shape--1"></div>
-                    <div class="shape shape--2"></div>
-                    <div class="shape shape--3"></div>
-                </div>
+
+            <!-- Экран результатов -->
+            <div class="quiz-result hidden" id="quiz-result-screen">
+                <h2 class="section__title">Результаты теста</h2>
+                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> вопросов.</p>
+                <button class="btn btn--outline" id="btn-restart-quiz">Пройти заново</button>
             </div>
         </div>
     </section>
