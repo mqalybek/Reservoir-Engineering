@@ -1,3 +1,30 @@
+// ================= МОБИЛЬНОЕ МЕНЮ (БУРГЕР) =================
+const navBurger = document.getElementById('nav-burger');
+const navMenu = document.querySelector('.nav');
+
+if (navBurger && navMenu) {
+    navBurger.addEventListener('click', () => {
+        navBurger.classList.toggle('is-open');
+        navMenu.classList.toggle('is-open');
+    });
+
+    // Закрыть меню при клике на ссылку
+    navMenu.querySelectorAll('.nav__link').forEach(link => {
+        link.addEventListener('click', () => {
+            navBurger.classList.remove('is-open');
+            navMenu.classList.remove('is-open');
+        });
+    });
+
+    // Закрыть меню при клике вне его
+    document.addEventListener('click', (e) => {
+        if (!navBurger.contains(e.target) && !navMenu.contains(e.target)) {
+            navBurger.classList.remove('is-open');
+            navMenu.classList.remove('is-open');
+        }
+    });
+}
+
 // ================= КВИЗ И ТЕСТЫ =================
 const btnStartQuiz = document.getElementById('btn-start-quiz');
 const quizStartScreen = document.getElementById('quiz-start-screen');

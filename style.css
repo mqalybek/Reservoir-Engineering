@@ -172,6 +172,9 @@ a {
     text-shadow: 0 0 8px rgba(255,255,255,0.4);
 }
 
+/* БУРГЕР (скрыт на десктопе) */
+.nav-burger { display: none; }
+
 /* РАНГИ ОФОРМЛЕНИЕ */
 .header__user-info {
     display: flex;
@@ -696,7 +699,7 @@ a {
     transform: translateY(0);
 }
 
-/* АДАПТИВНОСТЬ */
+/* АДАПТИВНОСТЬ (Планшеты — 900px) */
 @media (max-width: 900px) {
     .hero__container { grid-template-columns: 1fr; text-align: center; }
     .hero__title { font-size: 3rem; }
@@ -706,8 +709,133 @@ a {
     .interactive-banner { flex-direction: column; text-align: center; gap: 2rem; }
     .calc-grid, .glossary-grid { grid-template-columns: 1fr; }
     .glossary-item { grid-template-columns: 1fr; gap: 0.5rem; }
-    .nav { display: none; }
-    .header__user-info { margin-left: auto; margin-right: 0;}
     .footer__container { flex-direction: column; gap: 2rem; text-align: center; }
     .footer__links { justify-content: center; }
+
+    /* Бургер появляется */
+    .nav-burger {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 5px;
+        width: 36px;
+        height: 36px;
+        cursor: pointer;
+        padding: 4px;
+        margin-left: auto;
+        background: transparent;
+        border: none;
+    }
+    .nav-burger span {
+        display: block;
+        height: 2px;
+        width: 100%;
+        background: var(--color-gold);
+        border-radius: 2px;
+        transition: var(--transition);
+    }
+    .nav-burger.is-open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+    .nav-burger.is-open span:nth-child(2) { opacity: 0; }
+    .nav-burger.is-open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+    /* Мобильное меню (дропдаун сверху) */
+    .nav {
+        display: flex;
+        flex-direction: column;
+        position: fixed;
+        top: 80px;
+        left: 0;
+        right: 0;
+        background: rgba(5, 6, 10, 0.97);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(212, 175, 55, 0.2);
+        padding: 1.5rem 2rem;
+        gap: 0;
+        z-index: 999;
+        transform: translateY(-120%);
+        opacity: 0;
+        pointer-events: none;
+        transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+    }
+    .nav.is-open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: all;
+    }
+    .nav__link {
+        padding: 1rem 0;
+        font-size: 1.15rem;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .nav__link:last-child { border-bottom: none; }
+
+    /* Ранг и бургер рядом */
+    .header__container { gap: 1rem; }
+    .header__user-info { margin-left: auto; margin-right: 0; }
+}
+
+/* АДАПТИВНОСТЬ (Мобильные телефоны — 600px) */
+@media (max-width: 600px) {
+
+    /* Базовые отступы */
+    .container { padding: 0 1.25rem; }
+    .section { padding: 5rem 0; }
+
+    /* Типографика */
+    .section__title { font-size: 2rem; }
+    .section__subtitle { font-size: 1rem; margin-bottom: 2.5rem; }
+
+    /* Hero */
+    .hero { min-height: 75vh; }
+    .hero__title { font-size: 2.2rem; }
+    .hero__description { font-size: 1rem; }
+    .hero__actions { flex-direction: column; gap: 1rem; align-items: center; }
+    .btn--large { padding: 0.9rem 2rem; font-size: 1rem; width: 100%; text-align: center; }
+
+    /* Шапка */
+    .logo { font-size: 1.4rem; }
+    .header__user-info {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.9rem;
+    }
+
+    /* Теория */
+    .theory-summary { padding: 1.25rem 3rem 1.25rem 1.25rem; font-size: 1.05rem; }
+    .theory-summary::after { right: 1.25rem; }
+    .theory-content { padding: 0 1.25rem 1.5rem 1.25rem; }
+
+    /* Тест — стартовый банер */
+    .interactive-banner { padding: 2rem 1.5rem; }
+    .banner__title { font-size: 1.75rem; }
+
+    /* Тест — квиз */
+    .quiz-box { padding: 2rem 1.25rem; }
+    .quiz__question { font-size: 1.3rem; margin-bottom: 1.5rem; }
+    .quiz__btn { font-size: 1rem; padding: 1rem 1.1rem; }
+    .quiz-result { padding: 2.5rem 1.5rem; }
+
+    /* Глоссарий — карточки */
+    .flashcard-container { height: auto; min-height: 250px; }
+    .flashcard-front h3 { font-size: 1.75rem; }
+    .flashcard-back p { font-size: 1rem; }
+    .flashcard-front, .flashcard-back { padding: 2rem 1.5rem; }
+    .flashcard-controls { flex-direction: row; gap: 0.75rem; }
+    .flashcard-controls .btn { flex: 1; text-align: center; font-size: 0.9rem; padding: 0.75rem 0.5rem; }
+
+    /* Глоссарий — поиск */
+    .glossary__input { font-size: 0.95rem; padding: 1rem 1.5rem; }
+    .glossary-item { padding: 1.25rem; }
+    .glossary-item__term { font-size: 1rem; }
+    .glossary-item__def { font-size: 0.95rem; }
+
+    /* Калькуляторы */
+    .calc-card { padding: 1.75rem 1.25rem; }
+    .calc-card h3 { font-size: 1.4rem; }
+    .form-group input { font-size: 1rem; padding: 0.85rem; }
+    .calc-result { font-size: 1.4rem; }
+
+    /* Футер */
+    .footer { padding: 3rem 0 1.5rem; }
+    .footer__links { flex-direction: column; align-items: center; gap: 1rem; }
 }
