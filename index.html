@@ -219,30 +219,34 @@
             <div class="calc-grid">
                 <!-- Калькулятор STOOIP -->
                 <div class="calc-card">
-                    <h3>Запасы STOOIP</h3>
-                    <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Объемный метод (Volumetric)</p>
+                    <h3>Запасы Нефти (Qн)</h3>
+                    <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Объемный метод (по метрике РФ)</p>
                     <div class="form-group">
-                        <label>Площадь (A), акры</label>
-                        <input type="number" id="calc-area" value="1000">
+                        <label>Площадь (F), тыс. м²</label>
+                        <input type="number" id="calc-f" value="1000">
                     </div>
                     <div class="form-group">
-                        <label>Толщина (h), футы</label>
-                        <input type="number" id="calc-h" value="50">
+                        <label>Толщина (h), м</label>
+                        <input type="number" id="calc-h" value="10">
                     </div>
                     <div class="form-group">
-                        <label>Пористость (Φ), доли (0-1)</label>
-                        <input type="number" id="calc-poro" value="0.20" step="0.01">
+                        <label>Пористость (m), доли единиц</label>
+                        <input type="number" id="calc-m" value="0.20" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>Нефтенасыщенность (So), доли (0-1)</label>
-                        <input type="number" id="calc-so" value="0.75" step="0.01">
+                        <label>Нефтенасыщенность (βн), доли</label>
+                        <input type="number" id="calc-beta" value="0.75" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>Объемный коэфф. (Bo), bbl/STB</label>
-                        <input type="number" id="calc-bo" value="1.2" step="0.01">
+                        <label>Удельный вес (γн), г/см³</label>
+                        <input type="number" id="calc-gamma" value="0.85" step="0.01">
                     </div>
-                    <button class="btn btn--outline" id="btn-calc-stooip" style="width:100%; margin-top:1rem;">Рассчитать STOOIP</button>
-                    <div class="calc-result" id="res-stooip">0 STB</div>
+                    <div class="form-group">
+                        <label>Пересчетный коэфф. (θ), доли</label>
+                        <input type="number" id="calc-theta" value="0.95" step="0.01">
+                    </div>
+                    <button class="btn btn--outline" id="btn-calc-vol" style="width:100%; margin-top:1rem;">Рассчитать (Qн)</button>
+                    <div class="calc-result" id="res-vol">0 тыс. т</div>
                 </div>
 
                 <!-- Конвертер API -->

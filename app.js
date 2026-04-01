@@ -199,19 +199,20 @@ if (flashcard && typeof glossaryData !== 'undefined') {
 }
 
 // ================= КАЛЬКУЛЯТОРЫ =================
-const btnCalcStooip = document.getElementById('btn-calc-stooip');
+const btnCalcVol = document.getElementById('btn-calc-vol');
 const btnCalcApi = document.getElementById('btn-calc-api');
 
-if (btnCalcStooip) {
-    btnCalcStooip.addEventListener('click', () => {
-        const A = parseFloat(document.getElementById('calc-area').value) || 0;
+if (btnCalcVol) {
+    btnCalcVol.addEventListener('click', () => {
+        const F = parseFloat(document.getElementById('calc-f').value) || 0;
         const h = parseFloat(document.getElementById('calc-h').value) || 0;
-        const poro = parseFloat(document.getElementById('calc-poro').value) || 0;
-        const So = parseFloat(document.getElementById('calc-so').value) || 0;
-        const Bo = parseFloat(document.getElementById('calc-bo').value) || 1;
+        const m = parseFloat(document.getElementById('calc-m').value) || 0;
+        const beta = parseFloat(document.getElementById('calc-beta').value) || 0;
+        const gamma = parseFloat(document.getElementById('calc-gamma').value) || 0;
+        const theta = parseFloat(document.getElementById('calc-theta').value) || 0;
 
-        const stooip = (7758 * A * h * poro * So) / Bo;
-        document.getElementById('res-stooip').innerText = Math.round(stooip).toLocaleString('ru-RU') + ' STB';
+        const qn = F * h * m * beta * gamma * theta;
+        document.getElementById('res-vol').innerText = Math.round(qn).toLocaleString('ru-RU') + ' тыс. т';
     });
 }
 
