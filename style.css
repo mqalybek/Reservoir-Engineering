@@ -405,9 +405,50 @@ a {
     justify-content: space-between;
     font-weight: 600;
     color: var(--color-text-muted);
+    margin-bottom: 1.5rem;
+}
+.quiz__nav-dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
     margin-bottom: 2rem;
     border-bottom: 1px solid rgba(255,255,255,0.05);
-    padding-bottom: 1rem;
+    padding-bottom: 1.5rem;
+}
+.quiz-dot {
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.quiz-dot:hover {
+    background: rgba(255,255,255,0.1);
+    color: #FFF;
+}
+.quiz-dot.active {
+    background: var(--color-gold);
+    color: #05060A;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 10px var(--color-gold-glow);
+}
+.quiz-dot.answered_correct {
+    background: rgba(46, 125, 50, 0.2);
+    border-color: #4CAF50;
+    color: #A5D6A7;
+}
+.quiz-dot.answered_wrong {
+    background: rgba(198, 40, 40, 0.2);
+    border-color: #F44336;
+    color: #EF9A9A;
 }
 .quiz__question {
     font-size: 1.75rem;

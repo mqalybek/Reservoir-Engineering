@@ -38,24 +38,64 @@ const btnNext = document.getElementById('btn-next-question');
 const finalScoreEl = document.getElementById('final-score');
 const btnRestart = document.getElementById('btn-restart-quiz');
 
+const navDotsContainer = document.getElementById('quiz-nav-dots');
+const btnPrev = document.getElementById('btn-prev-question');
+const btnFinish = document.getElementById('btn-finish-quiz');
+
 let currentQuestionIndex = 0;
 let score = 0;
+let userAnswers = [];
 
 function startQuiz() {
     currentQuestionIndex = 0;
     score = 0;
+    if(typeof quizData !== 'undefined') {
+        userAnswers = new Array(quizData.length).fill(null);
+    }
     quizStartScreen.classList.add('hidden');
     quizResultScreen.classList.add('hidden');
     quizBox.classList.remove('hidden');
     scoreEl.textContent = score;
+    renderNavDots();
     loadQuestion();
+}
+
+function renderNavDots() {
+    if (!navDotsContainer) return;
+    navDotsContainer.innerHTML = '';
+    quizData.forEach((_, index) => {
+        const dot = document.createElement('div');
+        dot.classList.add('quiz-dot');
+        dot.textContent = index + 1;
+        dot.addEventListener('click', () => {
+            currentQuestionIndex = index;
+            loadQuestion();
+        });
+        navDotsContainer.appendChild(dot);
+    });
+}
+
+function updateNavDots() {
+    if (!navDotsContainer) return;
+    Array.from(navDotsContainer.children).forEach((dot, index) => {
+        dot.className = 'quiz-dot'; // reset
+        if (index === currentQuestionIndex) {
+            dot.classList.add('active');
+        } else if (userAnswers[index] !== null) {
+            const isCorrect = userAnswers[index] === quizData[index].answer;
+            dot.classList.add(isCorrect ? 'answered_correct' : 'answered_wrong');
+        }
+    });
 }
 
 function loadQuestion() {
     resetState();
+    updateNavDots();
     const currentQuestion = quizData[currentQuestionIndex];
     counterEl.textContent = `Вопрос ${currentQuestionIndex + 1} из ${quizData.length}`;
     questionEl.textContent = currentQuestion.question;
+
+    const answeredIndex = userAnswers[currentQuestionIndex];
 
     currentQuestion.options.forEach((option, index) => {
         const button = document.createElement('button');
@@ -64,56 +104,112 @@ function loadQuestion() {
         if (index === currentQuestion.answer) {
             button.dataset.correct = true;
         }
-        button.addEventListener('click', selectAnswer);
+        
+        button.addEventListener('click', () => selectAnswer(index, button));
         optionsEl.appendChild(button);
+
+        // Восстановление состояния, если уже отвечено
+        if (answeredIndex !== null) {
+            button.disabled = true;
+            if (index === currentQuestion.answer) {
+                button.classList.add('correct');
+            } else if (index === answeredIndex) {
+                button.classList.add('wrong');
+            }
+        }
     });
+
+    updateButtonsVisibility();
+}
+
+function updateButtonsVisibility() {
+    if(btnPrev) {
+        if (currentQuestionIndex > 0) btnPrev.classList.remove('hidden');
+        else btnPrev.classList.add('hidden');
+    }
+    
+    const isLastQuestion = currentQuestionIndex === quizData.length - 1;
+    if(btnNext) {
+        if (isLastQuestion) btnNext.classList.add('hidden');
+        else btnNext.classList.remove('hidden');
+    }
+    
+    if(btnFinish) {
+        const allAnswered = userAnswers.length > 0 && userAnswers.every(ans => ans !== null);
+        if (isLastQuestion || allAnswered) btnFinish.classList.remove('hidden');
+        else btnFinish.classList.add('hidden');
+    }
 }
 
 function resetState() {
-    btnNext.classList.add('hidden');
+    if(btnNext) btnNext.classList.add('hidden');
+    if(btnPrev) btnPrev.classList.add('hidden');
+    if(btnFinish) btnFinish.classList.add('hidden');
     while (optionsEl.firstChild) {
         optionsEl.removeChild(optionsEl.firstChild);
     }
 }
 
-function selectAnswer(e) {
-    const selectedBtn = e.target;
-    const isCorrect = selectedBtn.dataset.correct === "true";
+function selectAnswer(selectedIndex, selectedBtn) {
+    if (userAnswers[currentQuestionIndex] !== null) return;
+
+    const currentQuestion = quizData[currentQuestionIndex];
+    const isCorrect = selectedIndex === currentQuestion.answer;
     
+    userAnswers[currentQuestionIndex] = selectedIndex;
+
     if (isCorrect) {
         selectedBtn.classList.add('correct');
-        score++;
-        scoreEl.textContent = score;
     } else {
         selectedBtn.classList.add('wrong');
     }
 
-    // Подсвечиваем правильный и блокируем все кнопки
-    Array.from(optionsEl.children).forEach(button => {
-        if (button.dataset.correct === "true") {
+    // Блокируем кнопки и подсвечиваем правильный
+    Array.from(optionsEl.children).forEach((button, i) => {
+        if (i === currentQuestion.answer) {
             button.classList.add('correct');
         }
         button.disabled = true;
     });
 
-    btnNext.classList.remove('hidden');
+    recalculateScore();
+    updateNavDots();
+    updateButtonsVisibility();
+}
+
+function recalculateScore() {
+    score = 0;
+    userAnswers.forEach((ans, idx) => {
+        if (ans === quizData[idx].answer) score++;
+    });
+    scoreEl.textContent = score;
 }
 
 function handleNextButton() {
-    currentQuestionIndex++;
-    if (currentQuestionIndex < quizData.length) {
+    if (currentQuestionIndex < quizData.length - 1) {
+        currentQuestionIndex++;
         loadQuestion();
-    } else {
-        showResults();
     }
+}
+
+function handlePrevButton() {
+    if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        loadQuestion();
+    }
+}
+
+function handleFinishButton() {
+    showResults();
 }
 
 function showResults() {
     quizBox.classList.add('hidden');
     quizResultScreen.classList.remove('hidden');
+    
+    recalculateScore();
     finalScoreEl.textContent = score;
 
-    // Сохранение Рангов (прогресс)
     const currentMax = parseInt(localStorage.getItem('maxQuizScore') || '0');
     if (score > currentMax) {
         localStorage.setItem('maxQuizScore', score.toString());
@@ -123,6 +219,8 @@ function showResults() {
 
 if(btnStartQuiz) btnStartQuiz.addEventListener('click', startQuiz);
 if(btnNext) btnNext.addEventListener('click', handleNextButton);
+if(btnPrev) btnPrev.addEventListener('click', handlePrevButton);
+if(btnFinish) btnFinish.addEventListener('click', handleFinishButton);
 if(btnRestart) btnRestart.addEventListener('click', startQuiz);
 
 
