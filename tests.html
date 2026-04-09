@@ -37,12 +37,24 @@
     <!-- Блок «Вопросы и Тесты» -->
     <section id="questions" class="section fade-up">
         <div class="container" id="quiz-container">
-            <div class="interactive-banner" id="quiz-start-screen">
-                <div class="banner__text">
-                    <h2 class="banner__title">Проверь свою инженерную логику</h2>
-                    <p style="color:var(--color-text-muted); font-size:1.1rem; margin-top:0.5rem;">Пройди профессиональный тест по основам разработки нефтегазовых месторождений.</p>
+            <div class="test-cards-container" id="quiz-start-screen" style="display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2rem;">
+                <!-- Базовый тест -->
+                <div class="interactive-banner" style="flex: 1; min-width: 300px;">
+                    <div class="banner__text">
+                        <h2 class="banner__title">Базовый тест</h2>
+                        <p style="color:var(--color-text-muted); font-size:1.1rem; margin-top:0.5rem;">Проверьте знания основных терминов и показателей разработки месторождений.</p>
+                    </div>
+                    <button class="btn btn--outline btn--large" id="btn-start-basic" style="margin-top: 1.5rem;">Начать базовый тест</button>
                 </div>
-                <button class="btn btn--primary btn--large" id="btn-start-quiz">Начать испытание</button>
+                
+                <!-- Тест на инженера -->
+                <div class="interactive-banner" style="flex: 1; min-width: 300px;">
+                    <div class="banner__text">
+                        <h2 class="banner__title">Тест на инженера</h2>
+                        <p style="color:var(--color-text-muted); font-size:1.1rem; margin-top:0.5rem;">Продвинутый уровень: режимы залежи, МУН, способы эксплуатации.</p>
+                    </div>
+                    <button class="btn btn--primary btn--large" id="btn-start-engineer" style="margin-top: 1.5rem;">Начать тест инженера</button>
+                </div>
             </div>
             
             <!-- Скрытый блок самого квиза -->

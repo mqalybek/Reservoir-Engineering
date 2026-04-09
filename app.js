@@ -26,7 +26,8 @@ if (navBurger && navMenu) {
 }
 
 // ================= КВИЗ И ТЕСТЫ =================
-const btnStartQuiz = document.getElementById('btn-start-quiz');
+const btnStartBasic = document.getElementById('btn-start-basic');
+const btnStartEngineer = document.getElementById('btn-start-engineer');
 const quizStartScreen = document.getElementById('quiz-start-screen');
 const quizBox = document.getElementById('quiz-box');
 const quizResultScreen = document.getElementById('quiz-result-screen');
@@ -45,13 +46,24 @@ const btnFinish = document.getElementById('btn-finish-quiz');
 let currentQuestionIndex = 0;
 let score = 0;
 let userAnswers = [];
+let currentQuizData = [];
+let currentTestType = 'basic';
 
-function startQuiz() {
+function startQuiz(type) {
+    if (type) currentTestType = type;
+    
     currentQuestionIndex = 0;
     score = 0;
+    
     if(typeof quizData !== 'undefined') {
-        userAnswers = new Array(quizData.length).fill(null);
+        if (currentTestType === 'engineer') {
+            currentQuizData = quizData.slice(30);
+        } else {
+            currentQuizData = quizData.slice(0, 30);
+        }
+        userAnswers = new Array(currentQuizData.length).fill(null);
     }
+    
     quizStartScreen.classList.add('hidden');
     quizResultScreen.classList.add('hidden');
     quizBox.classList.remove('hidden');
@@ -63,7 +75,7 @@ function startQuiz() {
 function renderNavDots() {
     if (!navDotsContainer) return;
     navDotsContainer.innerHTML = '';
-    quizData.forEach((_, index) => {
+    currentQuizData.forEach((_, index) => {
         const dot = document.createElement('div');
         dot.classList.add('quiz-dot');
         dot.textContent = index + 1;
@@ -82,7 +94,7 @@ function updateNavDots() {
         if (index === currentQuestionIndex) {
             dot.classList.add('active');
         } else if (userAnswers[index] !== null) {
-            const isCorrect = userAnswers[index] === quizData[index].answer;
+            const isCorrect = userAnswers[index] === currentQuizData[index].answer;
             dot.classList.add(isCorrect ? 'answered_correct' : 'answered_wrong');
         }
     });
@@ -91,8 +103,8 @@ function updateNavDots() {
 function loadQuestion() {
     resetState();
     updateNavDots();
-    const currentQuestion = quizData[currentQuestionIndex];
-    counterEl.textContent = `Вопрос ${currentQuestionIndex + 1} из ${quizData.length}`;
+    const currentQuestion = currentQuizData[currentQuestionIndex];
+    counterEl.textContent = `Вопрос ${currentQuestionIndex + 1} из ${currentQuizData.length}`;
     questionEl.textContent = currentQuestion.question;
 
     const answeredIndex = userAnswers[currentQuestionIndex];
@@ -128,7 +140,7 @@ function updateButtonsVisibility() {
         else btnPrev.classList.add('hidden');
     }
     
-    const isLastQuestion = currentQuestionIndex === quizData.length - 1;
+    const isLastQuestion = currentQuestionIndex === currentQuizData.length - 1;
     if(btnNext) {
         if (isLastQuestion) btnNext.classList.add('hidden');
         else btnNext.classList.remove('hidden');
@@ -153,7 +165,7 @@ function resetState() {
 function selectAnswer(selectedIndex, selectedBtn) {
     if (userAnswers[currentQuestionIndex] !== null) return;
 
-    const currentQuestion = quizData[currentQuestionIndex];
+    const currentQuestion = currentQuizData[currentQuestionIndex];
     const isCorrect = selectedIndex === currentQuestion.answer;
     
     userAnswers[currentQuestionIndex] = selectedIndex;
@@ -180,13 +192,13 @@ function selectAnswer(selectedIndex, selectedBtn) {
 function recalculateScore() {
     score = 0;
     userAnswers.forEach((ans, idx) => {
-        if (ans === quizData[idx].answer) score++;
+        if (ans === currentQuizData[idx].answer) score++;
     });
     scoreEl.textContent = score;
 }
 
 function handleNextButton() {
-    if (currentQuestionIndex < quizData.length - 1) {
+    if (currentQuestionIndex < currentQuizData.length - 1) {
         currentQuestionIndex++;
         loadQuestion();
     }
@@ -208,7 +220,7 @@ function showResults() {
     quizResultScreen.classList.remove('hidden');
     
     recalculateScore();
-    finalScoreEl.textContent = score;
+    finalScoreEl.textContent = `${score} из ${currentQuizData.length}`;
 
     const currentMax = parseInt(localStorage.getItem('maxQuizScore') || '0');
     if (score > currentMax) {
@@ -217,11 +229,12 @@ function showResults() {
     }
 }
 
-if(btnStartQuiz) btnStartQuiz.addEventListener('click', startQuiz);
+if(btnStartBasic) btnStartBasic.addEventListener('click', () => startQuiz('basic'));
+if(btnStartEngineer) btnStartEngineer.addEventListener('click', () => startQuiz('engineer'));
 if(btnNext) btnNext.addEventListener('click', handleNextButton);
 if(btnPrev) btnPrev.addEventListener('click', handlePrevButton);
 if(btnFinish) btnFinish.addEventListener('click', handleFinishButton);
-if(btnRestart) btnRestart.addEventListener('click', startQuiz);
+if(btnRestart) btnRestart.addEventListener('click', () => startQuiz());
 
 
 // ================= ГЛОССАРИЙ =================
