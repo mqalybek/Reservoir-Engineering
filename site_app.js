@@ -95,9 +95,22 @@ function updateNavDots() {
         dot.className = 'quiz-dot'; // reset
         if (index === currentQuestionIndex) {
             dot.classList.add('active');
-        } else if (userAnswers[index] !== null) {
-            const isCorrect = userAnswers[index] === currentQuizData[index].answer;
-            dot.classList.add(isCorrect ? 'answered_correct' : 'answered_wrong');
+        } else if (userAnswers[index] !== null && userAnswers[index] !== undefined) {
+            const ans = userAnswers[index];
+            const q = currentQuizData[index];
+            let isCorrect = false;
+            let isLocked = true;
+            
+            if (Array.isArray(q.answer)) {
+                isLocked = ans.isLocked;
+                isCorrect = ans.isLocked && q.answer.every(a => ans.includes(a)) && !ans.some(a => !q.answer.includes(a));
+            } else {
+                isCorrect = ans === q.answer;
+            }
+            
+            if (isLocked) {
+                dot.classList.add(isCorrect ? 'answered_correct' : 'answered_wrong');
+            }
         }
     });
 }
@@ -109,26 +122,54 @@ function loadQuestion() {
     counterEl.textContent = `Вопрос ${currentQuestionIndex + 1} из ${currentQuizData.length}`;
     questionEl.textContent = currentQuestion.question;
 
-    const answeredIndex = userAnswers[currentQuestionIndex];
+    const answeredVal = userAnswers[currentQuestionIndex];
+    const isMultiOpts = Array.isArray(currentQuestion.answer);
 
+    if (isMultiOpts) {
+        const hint = document.createElement('p');
+        hint.textContent = `(Выберите правильные ответы: ${currentQuestion.answer.length})`;
+        hint.style.color = 'var(--color-gold)';
+        hint.style.marginBottom = '1rem';
+        hint.style.fontSize = '0.9rem';
+        optionsEl.appendChild(hint);
+    }
+
+    const letters = ['а', 'б', 'в', 'г', 'д', 'е', 'ж'];
+    
     currentQuestion.options.forEach((option, index) => {
         const button = document.createElement('button');
-        button.textContent = option;
+        const letter = letters[index] ? letters[index] + ') ' : '';
+        button.textContent = letter + option;
         button.classList.add('quiz__btn');
-        if (index === currentQuestion.answer) {
-            button.dataset.correct = true;
-        }
         
         button.addEventListener('click', () => selectAnswer(index, button));
         optionsEl.appendChild(button);
 
-        // Восстановление состояния, если уже отвечено
-        if (answeredIndex !== null) {
-            button.disabled = true;
-            if (index === currentQuestion.answer) {
-                button.classList.add('correct');
-            } else if (index === answeredIndex) {
-                button.classList.add('wrong');
+        // Восстановление состояния
+        if (answeredVal !== null && answeredVal !== undefined) {
+            if (!isMultiOpts) {
+                button.disabled = true;
+                if (index === currentQuestion.answer) {
+                    button.classList.add('correct');
+                } else if (index === answeredVal) {
+                    button.classList.add('wrong');
+                }
+            } else {
+                if (answeredVal.isLocked) {
+                    button.disabled = true;
+                    if (currentQuestion.answer.includes(index)) {
+                        button.classList.add('correct');
+                    } else if (answeredVal.includes(index)) {
+                        button.classList.add('wrong');
+                    }
+                } else if (answeredVal.includes(index)) {
+                    if (currentQuestion.answer.includes(index)) {
+                        button.classList.add('correct');
+                    } else {
+                        button.classList.add('wrong');
+                    }
+                    button.disabled = true;
+                }
             }
         }
     });
@@ -149,7 +190,11 @@ function updateButtonsVisibility() {
     }
     
     if(btnFinish) {
-        const allAnswered = userAnswers.length > 0 && userAnswers.every(ans => ans !== null);
+        const allAnswered = userAnswers.length > 0 && userAnswers.every((ans, idx) => {
+            if (ans === null || ans === undefined) return false;
+            if (Array.isArray(currentQuizData[idx].answer)) return ans.isLocked;
+            return true;
+        });
         if (isLastQuestion || allAnswered) btnFinish.classList.remove('hidden');
         else btnFinish.classList.add('hidden');
     }
@@ -165,11 +210,43 @@ function resetState() {
 }
 
 function selectAnswer(selectedIndex, selectedBtn) {
-    if (userAnswers[currentQuestionIndex] !== null) return;
-
     const currentQuestion = currentQuizData[currentQuestionIndex];
+    const isMultiOpts = Array.isArray(currentQuestion.answer);
+
+    if (isMultiOpts) {
+        if (!userAnswers[currentQuestionIndex]) userAnswers[currentQuestionIndex] = [];
+        let ansArray = userAnswers[currentQuestionIndex];
+        
+        if (ansArray.isLocked) return;
+        if (ansArray.includes(selectedIndex)) return;
+        ansArray.push(selectedIndex);
+
+        const isCorrect = currentQuestion.answer.includes(selectedIndex);
+        if (isCorrect) {
+            selectedBtn.classList.add('correct');
+            selectedBtn.disabled = true;
+        } else {
+            selectedBtn.classList.add('wrong');
+            ansArray.isLocked = true;
+        }
+
+        const allCorrectSelected = currentQuestion.answer.every(a => ansArray.includes(a));
+        if (allCorrectSelected || ansArray.isLocked) {
+            ansArray.isLocked = true;
+            document.querySelectorAll('.quiz__btn').forEach((button, i) => {
+                if (currentQuestion.answer.includes(i)) button.classList.add('correct');
+                button.disabled = true;
+            });
+            recalculateScore();
+            updateNavDots();
+            updateButtonsVisibility();
+        }
+        return;
+    }
+
+    if (userAnswers[currentQuestionIndex] !== null && userAnswers[currentQuestionIndex] !== undefined) return;
+
     const isCorrect = selectedIndex === currentQuestion.answer;
-    
     userAnswers[currentQuestionIndex] = selectedIndex;
 
     if (isCorrect) {
@@ -178,8 +255,7 @@ function selectAnswer(selectedIndex, selectedBtn) {
         selectedBtn.classList.add('wrong');
     }
 
-    // Блокируем кнопки и подсвечиваем правильный
-    Array.from(optionsEl.children).forEach((button, i) => {
+    document.querySelectorAll('.quiz__btn').forEach((button, i) => {
         if (i === currentQuestion.answer) {
             button.classList.add('correct');
         }
@@ -194,7 +270,16 @@ function selectAnswer(selectedIndex, selectedBtn) {
 function recalculateScore() {
     score = 0;
     userAnswers.forEach((ans, idx) => {
-        if (ans === currentQuizData[idx].answer) score++;
+        if (ans !== null && ans !== undefined) {
+            const q = currentQuizData[idx];
+            if (Array.isArray(q.answer)) {
+                if (ans.isLocked && q.answer.every(a => ans.includes(a)) && !ans.some(a => !q.answer.includes(a))) {
+                    score++;
+                }
+            } else {
+                if (ans === q.answer) score++;
+            }
+        }
     });
     scoreEl.textContent = score;
 }

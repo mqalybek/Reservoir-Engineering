@@ -419,7 +419,7 @@ const quizDataEngineer = [
             "см2/т",
             "м3/м3"
         ],
-        answer: 1
+        answer: [1, 4]
     },
     {
         id: 9,
