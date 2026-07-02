@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="PetroLearn — образовательная платформа по разработке нефтяных и газовых месторождений: теория, тесты, глоссарий и инженерные калькуляторы.">
+    <meta name="description" content="PetroLearn — образовательная платформа по разработке нефтяных и газовых месторождений: теория, справочник формул, тесты, глоссарий и инженерные калькуляторы.">
     <title>PetroLearn | Главная</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,6 +24,7 @@
             <nav class="nav">
                 <a href="index.html" class="nav__link active">Главная</a>
                 <a href="theory.html" class="nav__link">Теория</a>
+                <a href="formulas.html" class="nav__link">Формулы</a>
                 <a href="tests.html" class="nav__link">Тесты</a>
                 <a href="glossary.html" class="nav__link">Глоссарий</a>
                 <a href="calculators.html" class="nav__link">Расчеты</a>
@@ -79,6 +80,18 @@
                     <p class="feature-card__desc">6 разделов конспекта: от пластовых флюидов до классификации запасов.</p>
                 </a>
 
+                <a href="formulas.html" class="feature-card">
+                    <div class="feature-card__icon">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16"/>
+                            <path d="M4 4l8 8-8 8"/>
+                            <path d="M4 20h16"/>
+                        </svg>
+                    </div>
+                    <h3 class="feature-card__title">Формулы</h3>
+                    <p class="feature-card__desc">Справочник формул с переменными, единицами и областью применимости.</p>
+                </a>
+
                 <a href="tests.html" class="feature-card">
                     <div class="feature-card__icon">
                         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -123,12 +136,12 @@
                     <div class="stat__label">вопроса в тестах</div>
                 </div>
                 <div class="stat">
-                    <div class="stat__value" id="stat-terms">18</div>
-                    <div class="stat__label">терминов в глоссарии</div>
+                    <div class="stat__value" id="stat-formulas">37</div>
+                    <div class="stat__label">формулы в справочнике</div>
                 </div>
                 <div class="stat">
-                    <div class="stat__value">4</div>
-                    <div class="stat__label">калькулятора</div>
+                    <div class="stat__value" id="stat-terms">18</div>
+                    <div class="stat__label">терминов в глоссарии</div>
                 </div>
             </div>
         </div>
@@ -144,6 +157,7 @@
             </div>
             <div class="footer__links">
                 <a href="theory.html">Теория</a>
+                <a href="formulas.html">Формулы</a>
                 <a href="tests.html">Тесты</a>
                 <a href="glossary.html">Глоссарий</a>
                 <a href="calculators.html">Расчеты</a>
@@ -155,6 +169,7 @@
     </footer>
 
 <script src="site_data.js"></script>
+<script src="formulas_data.js"></script>
 <script src="site_app.js"></script>
 
 </body>

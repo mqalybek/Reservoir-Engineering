@@ -676,15 +676,166 @@ if (btnCalcConvert) {
     });
 }
 
+// ================= СПРАВОЧНИК ФОРМУЛ =================
+const formulasListEl = document.getElementById('formulas-list');
+
+if (formulasListEl && typeof formulasData !== 'undefined' && typeof katex !== 'undefined') {
+    const chipsEl = document.getElementById('formula-chips');
+    const formulaSearchEl = document.getElementById('formula-search-input');
+    const emptyEl = document.getElementById('formulas-empty');
+
+    let activeCategory = 'all';
+    let searchQuery = '';
+
+    function renderMath(el, latex, displayMode) {
+        try {
+            katex.render(latex, el, { throwOnError: false, displayMode });
+        } catch (e) {
+            el.textContent = latex;
+        }
+    }
+
+    function buildFormulaCard(formula) {
+        const card = document.createElement('article');
+        card.classList.add('formula-card');
+        card.id = 'formula-' + formula.id;
+        card.dataset.category = formula.category;
+        card.dataset.search = [
+            formula.title,
+            formula.note || '',
+            (formula.variables || []).map(v => v.name).join(' ')
+        ].join(' ').toLowerCase();
+
+        const head = document.createElement('div');
+        head.classList.add('formula-card__head');
+
+        const title = document.createElement('h3');
+        title.classList.add('formula-card__title');
+        title.textContent = formula.title;
+        head.appendChild(title);
+
+        if (formula.calcLink) {
+            const link = document.createElement('a');
+            link.classList.add('formula-card__calc-link');
+            link.href = formula.calcLink.href;
+            link.textContent = formula.calcLink.label + ' →';
+            head.appendChild(link);
+        }
+        card.appendChild(head);
+
+        const math = document.createElement('div');
+        math.classList.add('formula-math');
+        renderMath(math, formula.latex, true);
+        card.appendChild(math);
+
+        if (formula.variables && formula.variables.length) {
+            const table = document.createElement('table');
+            table.classList.add('formula-vars');
+            formula.variables.forEach(v => {
+                const row = table.insertRow();
+                const symbolCell = row.insertCell();
+                symbolCell.classList.add('formula-vars__symbol');
+                renderMath(symbolCell, v.symbol, false);
+                row.insertCell().textContent = v.name;
+                const unitsCell = row.insertCell();
+                unitsCell.classList.add('formula-vars__units');
+                unitsCell.textContent = v.units;
+            });
+            card.appendChild(table);
+        }
+
+        if (formula.note) {
+            const note = document.createElement('p');
+            note.classList.add('formula-note');
+            note.textContent = formula.note;
+            card.appendChild(note);
+        }
+
+        if (formula.source) {
+            const source = document.createElement('p');
+            source.classList.add('formula-source');
+            source.textContent = 'Источник: ' + formula.source;
+            card.appendChild(source);
+        }
+
+        return card;
+    }
+
+    // Первичный рендер: карточки строятся один раз, фильтрация — скрытием
+    const categorySections = [];
+    formulaCategories.forEach(cat => {
+        const section = document.createElement('div');
+        section.classList.add('formula-category');
+        section.dataset.category = cat.id;
+
+        const heading = document.createElement('h3');
+        heading.classList.add('formula-category__title');
+        heading.textContent = cat.name;
+        section.appendChild(heading);
+
+        formulasData
+            .filter(f => f.category === cat.id)
+            .forEach(f => section.appendChild(buildFormulaCard(f)));
+
+        formulasListEl.appendChild(section);
+        categorySections.push(section);
+    });
+
+    function applyFormulaFilter() {
+        let visibleTotal = 0;
+        categorySections.forEach(section => {
+            let visibleInSection = 0;
+            section.querySelectorAll('.formula-card').forEach(card => {
+                const matchesCategory = activeCategory === 'all' || card.dataset.category === activeCategory;
+                const matchesSearch = !searchQuery || card.dataset.search.includes(searchQuery);
+                const visible = matchesCategory && matchesSearch;
+                card.classList.toggle('hidden', !visible);
+                if (visible) visibleInSection++;
+            });
+            section.classList.toggle('hidden', visibleInSection === 0);
+            visibleTotal += visibleInSection;
+        });
+        if (emptyEl) emptyEl.classList.toggle('hidden', visibleTotal > 0);
+    }
+
+    if (chipsEl) {
+        const allCats = [{ id: 'all', name: 'Все' }].concat(formulaCategories);
+        allCats.forEach(cat => {
+            const chip = document.createElement('button');
+            chip.classList.add('chip');
+            if (cat.id === 'all') chip.classList.add('active');
+            chip.textContent = cat.name;
+            chip.addEventListener('click', () => {
+                activeCategory = cat.id;
+                chipsEl.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                applyFormulaFilter();
+            });
+            chipsEl.appendChild(chip);
+        });
+    }
+
+    if (formulaSearchEl) {
+        formulaSearchEl.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            applyFormulaFilter();
+        });
+    }
+}
+
 // ================= ГЛАВНАЯ: СТАТИСТИКА =================
 (function renderHomeStats() {
     const questionsEl = document.getElementById('stat-questions');
     const termsEl = document.getElementById('stat-terms');
+    const formulasEl = document.getElementById('stat-formulas');
     if (questionsEl && typeof quizDataBasic !== 'undefined' && typeof quizDataEngineer !== 'undefined') {
         questionsEl.textContent = quizDataBasic.length + quizDataEngineer.length;
     }
     if (termsEl && typeof glossaryData !== 'undefined') {
         termsEl.textContent = glossaryData.length;
+    }
+    if (formulasEl && typeof formulasData !== 'undefined') {
+        formulasEl.textContent = formulasData.length;
     }
 })();
 
