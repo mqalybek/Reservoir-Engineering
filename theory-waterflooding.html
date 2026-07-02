@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Теория разработки нефтяных и газовых месторождений: пластовые флюиды, коллекторы, режимы залежей, системы разработки, заводнение и МУН, запасы.">
-    <title>PetroLearn | Теория</title>
+    <meta name="description" content="Виды заводнения, вытеснение нефти водой, физико-химические, тепловые и гидродинамические МУН.">
+    <title>PetroLearn | Заводнение и методы увеличения нефтеотдачи</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="vendor/katex/katex.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -37,14 +38,25 @@
         </div>
     </header>
 
-    <!-- Хаб теории: карточки разделов -->
-    <section id="theory" class="section fade-up">
+    <!-- Страница раздела теории: контент генерируется из theory_data.js -->
+    <section class="section fade-up theory-page" data-section="waterflooding">
         <div class="container">
-            <h2 class="section__title">Теория <span class="text-accent">разработки</span></h2>
-            <p class="section__subtitle">Структурированный конспект по разработке нефтяных и газовых месторождений — с формулами, таблицами и перекрёстными ссылками.</p>
-
-            <div class="theory-hub-grid" id="theory-hub">
-                <!-- Карточки разделов генерируются из theory_data.js -->
+            <nav class="breadcrumbs" aria-label="Хлебные крошки">
+                <a href="theory.html">Теория</a> <span class="breadcrumbs__sep">/</span> <span>Заводнение и методы увеличения нефтеотдачи</span>
+            </nav>
+            <div class="theory-layout">
+                <aside class="theory-toc" id="theory-toc" aria-label="Содержание раздела">
+                    <!-- Оглавление генерируется -->
+                </aside>
+                <div class="theory-body">
+                    <h1 class="theory-title" id="theory-title">Заводнение и методы увеличения нефтеотдачи</h1>
+                    <div id="theory-content">
+                        <noscript><p>Для отображения конспекта включите JavaScript. Все материалы также доступны в <a href="formulas.html">справочнике формул</a> и <a href="glossary.html">глоссарии</a>.</p></noscript>
+                    </div>
+                    <nav class="theory-pager" id="theory-pager" aria-label="Соседние разделы">
+                        <!-- Ссылки назад/вперёд генерируются -->
+                    </nav>
+                </div>
             </div>
         </div>
     </section>

@@ -562,9 +562,16 @@ if (searchInput) {
     });
 }
 
-// Инициализация глоссария
-if (typeof glossaryData !== 'undefined') {
-    renderGlossary(glossaryData);
+// Инициализация глоссария (с поддержкой ссылок вида glossary.html?q=термин)
+if (glossaryListEl && typeof glossaryData !== 'undefined') {
+    const params = new URLSearchParams(window.location.search);
+    const query = (params.get('q') || '').trim();
+    if (query && searchInput) {
+        searchInput.value = query;
+        searchInput.dispatchEvent(new Event('input'));
+    } else {
+        renderGlossary(glossaryData);
+    }
 }
 
 // ================= ФЛЭШ-КАРТОЧКИ =================
@@ -698,6 +705,43 @@ if (btnCalcConvert) {
     });
 }
 
+// ================= РЕНДЕР МАТЕМАТИКИ (KaTeX) =================
+// Если KaTeX ещё не загружен, показываем формулу простым текстом,
+// а после загрузки библиотеки дорендериваем начисто.
+function renderMath(el, latex, displayMode) {
+    el.dataset.latex = latex;
+    if (displayMode) el.dataset.display = '1';
+    if (typeof katex === 'undefined') {
+        el.textContent = latex.replace(/\\text\{([^}]*)\}/g, '$1').replace(/[\\{}]/g, '');
+        return;
+    }
+    try {
+        katex.render(latex, el, { throwOnError: false, displayMode });
+    } catch (e) {
+        el.textContent = latex;
+    }
+}
+
+// Асинхронная подгрузка KaTeX: не блокирует страницу, если файл
+// недоступен или отдаётся медленно.
+function loadKatexAndRerender() {
+    if (typeof katex !== 'undefined') return;
+    const script = document.createElement('script');
+    script.src = 'vendor/katex/katex.min.js';
+    script.async = true;
+    script.onload = () => {
+        document.querySelectorAll('[data-latex]').forEach(el => {
+            try {
+                katex.render(el.dataset.latex, el, {
+                    throwOnError: false,
+                    displayMode: el.dataset.display === '1'
+                });
+            } catch (e) { /* оставляем текстовый вариант */ }
+        });
+    };
+    document.body.appendChild(script);
+}
+
 // ================= СПРАВОЧНИК ФОРМУЛ =================
 const formulasListEl = document.getElementById('formulas-list');
 
@@ -708,42 +752,6 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
 
     let activeCategory = 'all';
     let searchQuery = '';
-
-    // Если KaTeX ещё не загружен, показываем формулу простым текстом,
-    // а после загрузки библиотеки дорендериваем начисто.
-    function renderMath(el, latex, displayMode) {
-        el.dataset.latex = latex;
-        if (displayMode) el.dataset.display = '1';
-        if (typeof katex === 'undefined') {
-            el.textContent = latex.replace(/\\text\{([^}]*)\}/g, '$1').replace(/[\\{}]/g, '');
-            return;
-        }
-        try {
-            katex.render(latex, el, { throwOnError: false, displayMode });
-        } catch (e) {
-            el.textContent = latex;
-        }
-    }
-
-    // Асинхронная подгрузка KaTeX: не блокирует страницу, если файл
-    // недоступен или отдаётся медленно.
-    function loadKatexAndRerender() {
-        if (typeof katex !== 'undefined') return;
-        const script = document.createElement('script');
-        script.src = 'vendor/katex/katex.min.js';
-        script.async = true;
-        script.onload = () => {
-            document.querySelectorAll('[data-latex]').forEach(el => {
-                try {
-                    katex.render(el.dataset.latex, el, {
-                        throwOnError: false,
-                        displayMode: el.dataset.display === '1'
-                    });
-                } catch (e) { /* оставляем текстовый вариант */ }
-            });
-        };
-        document.body.appendChild(script);
-    }
 
     function buildFormulaCard(formula) {
         const card = document.createElement('article');
@@ -879,11 +887,250 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
     console.error('Ошибка инициализации справочника формул:', e);
 } }
 
+// ================= ТЕОРИЯ: ХАБ РАЗДЕЛОВ =================
+const theoryHubEl = document.getElementById('theory-hub');
+
+if (theoryHubEl && typeof theoryData !== 'undefined') {
+    theoryData.forEach((section, index) => {
+        const card = document.createElement('a');
+        card.classList.add('theory-hub-card');
+        card.href = section.page;
+
+        const num = document.createElement('span');
+        num.classList.add('theory-hub-card__num');
+        num.textContent = String(index + 1).padStart(2, '0');
+        card.appendChild(num);
+
+        const title = document.createElement('h3');
+        title.classList.add('theory-hub-card__title');
+        title.textContent = section.title;
+        card.appendChild(title);
+
+        const desc = document.createElement('p');
+        desc.classList.add('theory-hub-card__desc');
+        desc.textContent = section.description;
+        card.appendChild(desc);
+
+        const meta = document.createElement('span');
+        meta.classList.add('theory-hub-card__meta');
+        meta.textContent = section.topics.length + ' ' +
+            (section.topics.length === 1 ? 'тема' : section.topics.length < 5 ? 'темы' : 'тем') + ' →';
+        card.appendChild(meta);
+
+        theoryHubEl.appendChild(card);
+    });
+}
+
+// ================= ТЕОРИЯ: СТРАНИЦА РАЗДЕЛА =================
+const theoryPageEl = document.querySelector('.theory-page');
+const theoryContentEl = document.getElementById('theory-content');
+
+if (theoryPageEl && theoryContentEl && typeof theoryData !== 'undefined') { try {
+    const section = theoryData.find(s => s.id === theoryPageEl.dataset.section);
+    if (!section) throw new Error('Раздел теории не найден: ' + theoryPageEl.dataset.section);
+
+    function findGlossaryEntry(name) {
+        if (typeof glossaryData === 'undefined') return null;
+        const query = name.toLowerCase();
+        return glossaryData.find(g => g.term.toLowerCase().includes(query)) || null;
+    }
+
+    // Разбор маркеров {{term:…}} и {{formula:…}} внутри текста —
+    // строится DOM, никакой интерполяции HTML.
+    function appendRichText(parent, str) {
+        const markerRe = /\{\{(term|formula):([^}|]+)(?:\|([^}]+))?\}\}/g;
+        let lastIndex = 0;
+        let match;
+        while ((match = markerRe.exec(str)) !== null) {
+            if (match.index > lastIndex) {
+                parent.appendChild(document.createTextNode(str.slice(lastIndex, match.index)));
+            }
+            const link = document.createElement('a');
+            link.textContent = match[3] || match[2];
+            if (match[1] === 'term') {
+                link.classList.add('term-link');
+                link.href = 'glossary.html?q=' + encodeURIComponent(match[2]);
+                const entry = findGlossaryEntry(match[2]);
+                if (entry) link.title = entry.definition;
+            } else {
+                link.classList.add('formula-link');
+                link.href = 'formulas.html#formula-' + match[2];
+            }
+            parent.appendChild(link);
+            lastIndex = markerRe.lastIndex;
+        }
+        if (lastIndex < str.length) {
+            parent.appendChild(document.createTextNode(str.slice(lastIndex)));
+        }
+    }
+
+    function buildBlock(block) {
+        if (block.type === 'text') {
+            const fragment = document.createDocumentFragment();
+            block.text.split('\n\n').forEach(par => {
+                const p = document.createElement('p');
+                p.classList.add('theory-paragraph');
+                appendRichText(p, par);
+                fragment.appendChild(p);
+            });
+            return fragment;
+        }
+
+        if (block.type === 'formula') {
+            const formula = (typeof formulasData !== 'undefined')
+                ? formulasData.find(f => f.id === block.ref)
+                : null;
+            const embed = document.createElement('div');
+            embed.classList.add('formula-embed');
+            if (!formula) return embed;
+
+            const math = document.createElement('div');
+            math.classList.add('formula-embed__math');
+            renderMath(math, formula.latex, true);
+            embed.appendChild(math);
+
+            const foot = document.createElement('div');
+            foot.classList.add('formula-embed__foot');
+            const refLink = document.createElement('a');
+            refLink.href = 'formulas.html#formula-' + formula.id;
+            refLink.textContent = formula.title + ' — подробнее в справочнике →';
+            foot.appendChild(refLink);
+            if (formula.calcLink) {
+                const calcLink = document.createElement('a');
+                calcLink.href = formula.calcLink.href;
+                calcLink.textContent = formula.calcLink.label + ' →';
+                foot.appendChild(calcLink);
+            }
+            embed.appendChild(foot);
+            return embed;
+        }
+
+        if (block.type === 'table') {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('data-table-wrap');
+            const table = document.createElement('table');
+            table.classList.add('data-table');
+            if (block.caption) {
+                const caption = document.createElement('caption');
+                caption.textContent = block.caption;
+                table.appendChild(caption);
+            }
+            const thead = table.createTHead();
+            const headRow = thead.insertRow();
+            block.head.forEach(cell => {
+                const th = document.createElement('th');
+                th.textContent = cell;
+                headRow.appendChild(th);
+            });
+            const tbody = table.createTBody();
+            block.rows.forEach(row => {
+                const tr = tbody.insertRow();
+                row.forEach(cell => { tr.insertCell().textContent = cell; });
+            });
+            wrapper.appendChild(table);
+            return wrapper;
+        }
+
+        if (block.type === 'note') {
+            const note = document.createElement('p');
+            note.classList.add('theory-note');
+            appendRichText(note, block.text);
+            return note;
+        }
+
+        return document.createDocumentFragment();
+    }
+
+    // Контент раздела
+    section.topics.forEach(topic => {
+        const topicEl = document.createElement('article');
+        topicEl.classList.add('theory-topic');
+
+        const heading = document.createElement('h2');
+        heading.classList.add('theory-topic__title');
+        heading.id = topic.id;
+        heading.textContent = topic.title;
+        topicEl.appendChild(heading);
+
+        topic.blocks.forEach(block => topicEl.appendChild(buildBlock(block)));
+        theoryContentEl.appendChild(topicEl);
+    });
+
+    // Оглавление с подсветкой текущей темы при прокрутке
+    const tocEl = document.getElementById('theory-toc');
+    if (tocEl) {
+        const tocTitle = document.createElement('p');
+        tocTitle.classList.add('theory-toc__title');
+        tocTitle.textContent = 'Содержание';
+        tocEl.appendChild(tocTitle);
+
+        const list = document.createElement('ul');
+        list.classList.add('theory-toc__list');
+        const tocLinks = new Map();
+        section.topics.forEach(topic => {
+            const li = document.createElement('li');
+            const a = document.createElement('a');
+            a.href = '#' + topic.id;
+            a.textContent = topic.title;
+            li.appendChild(a);
+            list.appendChild(li);
+            tocLinks.set(topic.id, a);
+        });
+        tocEl.appendChild(list);
+
+        if ('IntersectionObserver' in window) {
+            const spy = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        tocLinks.forEach(link => link.classList.remove('active'));
+                        const link = tocLinks.get(entry.target.id);
+                        if (link) link.classList.add('active');
+                    }
+                });
+            }, { rootMargin: '-20% 0px -70% 0px' });
+            section.topics.forEach(topic => {
+                const h = document.getElementById(topic.id);
+                if (h) spy.observe(h);
+            });
+        }
+    }
+
+    // Навигация между разделами
+    const pagerEl = document.getElementById('theory-pager');
+    if (pagerEl) {
+        const index = theoryData.indexOf(section);
+        const prev = theoryData[index - 1];
+        const next = theoryData[index + 1];
+        if (prev) {
+            const a = document.createElement('a');
+            a.classList.add('theory-pager__link', 'theory-pager__link--prev');
+            a.href = prev.page;
+            a.textContent = '← ' + prev.title;
+            pagerEl.appendChild(a);
+        }
+        if (next) {
+            const a = document.createElement('a');
+            a.classList.add('theory-pager__link', 'theory-pager__link--next');
+            a.href = next.page;
+            a.textContent = next.title + ' →';
+            pagerEl.appendChild(a);
+        }
+    }
+
+    loadKatexAndRerender();
+} catch (e) {
+    console.error('Ошибка рендеринга раздела теории:', e);
+} }
+
 // ================= ГЛАВНАЯ: СТАТИСТИКА =================
 (function renderHomeStats() {
     const questionsEl = document.getElementById('stat-questions');
     const termsEl = document.getElementById('stat-terms');
     const formulasEl = document.getElementById('stat-formulas');
+    const sectionsEl = document.getElementById('stat-sections');
+    if (sectionsEl && typeof theoryData !== 'undefined') {
+        sectionsEl.textContent = theoryData.length;
+    }
     if (questionsEl && typeof quizDataBasic !== 'undefined' && typeof quizDataEngineer !== 'undefined') {
         questionsEl.textContent = quizDataBasic.length + quizDataEngineer.length;
     }
