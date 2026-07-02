@@ -679,7 +679,7 @@ if (btnCalcConvert) {
 // ================= СПРАВОЧНИК ФОРМУЛ =================
 const formulasListEl = document.getElementById('formulas-list');
 
-if (formulasListEl && typeof formulasData !== 'undefined' && typeof katex !== 'undefined') {
+if (formulasListEl && typeof formulasData !== 'undefined') {
     const chipsEl = document.getElementById('formula-chips');
     const formulaSearchEl = document.getElementById('formula-search-input');
     const emptyEl = document.getElementById('formulas-empty');
@@ -687,7 +687,13 @@ if (formulasListEl && typeof formulasData !== 'undefined' && typeof katex !== 'u
     let activeCategory = 'all';
     let searchQuery = '';
 
+    // Если KaTeX не загрузился, показываем формулу простым текстом,
+    // чтобы справочник оставался читаемым.
     function renderMath(el, latex, displayMode) {
+        if (typeof katex === 'undefined') {
+            el.textContent = latex.replace(/\\text\{([^}]*)\}/g, '$1').replace(/[\\{}]/g, '');
+            return;
+        }
         try {
             katex.render(latex, el, { throwOnError: false, displayMode });
         } catch (e) {
