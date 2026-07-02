@@ -909,6 +909,140 @@ a {
     font-variant-numeric: tabular-nums;
 }
 
+/* СПРАВОЧНИК ФОРМУЛ */
+.formulas-toolbar {
+    margin-bottom: 3rem;
+}
+.formula-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+.chip {
+    padding: 0.45rem 1.1rem;
+    border-radius: 20px;
+    border: 1px solid var(--color-border-strong);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.chip:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+.chip.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #FFFFFF;
+}
+.formula-category__title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-main);
+    margin: 3rem 0 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--color-accent-soft);
+}
+.formula-category:first-child .formula-category__title {
+    margin-top: 0;
+}
+.formula-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 1.75rem 2rem;
+    margin-bottom: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    scroll-margin-top: 90px;
+}
+.formula-card:hover {
+    border-color: var(--color-accent-border);
+}
+.formula-card__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+}
+.formula-card__title {
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+.formula-card__calc-link {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--color-accent);
+    white-space: nowrap;
+}
+.formula-card__calc-link:hover {
+    color: var(--color-accent-hover);
+    text-decoration: underline;
+}
+.formula-math {
+    padding: 1.25rem 1rem;
+    margin-bottom: 1.25rem;
+    background: var(--color-surface-subtle);
+    border-radius: 8px;
+    text-align: center;
+    overflow-x: auto;
+    font-size: 1.05rem;
+}
+.formula-vars {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+    margin-bottom: 1rem;
+}
+.formula-vars td {
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+    color: var(--color-text-muted);
+}
+.formula-vars tr:last-child td {
+    border-bottom: none;
+}
+.formula-vars__symbol {
+    white-space: nowrap;
+    color: var(--color-text-main);
+    width: 120px;
+}
+.formula-vars__units {
+    white-space: nowrap;
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+.formula-note {
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+    background: var(--color-accent-soft);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0 8px 8px 0;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+}
+.formula-source {
+    font-size: 0.82rem;
+    color: var(--color-text-muted);
+    opacity: 0.85;
+}
+.formulas-empty {
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 3rem 0;
+}
+/* Якорная прокрутка к карточкам калькуляторов из справочника */
+.calc-card { scroll-margin-top: 90px; }
+
 /* ФУТЕР */
 .footer {
     background: var(--color-surface);
@@ -1095,6 +1229,14 @@ a {
     .calc-card { padding: 1.75rem 1.25rem; }
     .calc-card h3 { font-size: 1.3rem; }
     .calc-result { font-size: 1.3rem; }
+
+    .formula-card { padding: 1.25rem; }
+    .formula-math { font-size: 0.95rem; padding: 1rem 0.5rem; }
+    .formula-vars { font-size: 0.85rem; }
+    .formula-vars td { padding: 0.4rem; }
+    .formula-vars__symbol { width: auto; }
+    .formula-vars__units { white-space: normal; text-align: left; }
+    .formula-category__title { font-size: 1.25rem; }
 
     .footer { padding: 3rem 0 1.5rem; }
     .footer__links { flex-direction: column; align-items: center; gap: 1rem; }
