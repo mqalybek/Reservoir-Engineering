@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Инженерные калькуляторы: запасы нефти объемным методом, дебит по Дюпюи, конвертация API в плотность и единиц измерения.">
     <title>PetroLearn | Расчеты</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>.nav__link.active { color: var(--color-gold); font-weight: 600; }</style>
 </head>
 <body>
 
@@ -45,28 +47,29 @@
                 <div class="calc-card">
                     <h3>Запасы Нефти (Qн)</h3>
                     <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Объемный метод (по метрике РФ)</p>
+                    <p class="calc-formula">Q<sub>н</sub> = F · h · m · β<sub>н</sub> · γ<sub>н</sub> · θ</p>
                     <div class="form-group">
-                        <label>Площадь (F), тыс. м²</label>
+                        <label for="calc-f">Площадь (F), тыс. м²</label>
                         <input type="number" id="calc-f" value="1000">
                     </div>
                     <div class="form-group">
-                        <label>Толщина (h), м</label>
+                        <label for="calc-h">Толщина (h), м</label>
                         <input type="number" id="calc-h" value="10">
                     </div>
                     <div class="form-group">
-                        <label>Пористость (m), доли единиц</label>
+                        <label for="calc-m">Пористость (m), доли единиц</label>
                         <input type="number" id="calc-m" value="0.20" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>Нефтенасыщенность (βн), доли</label>
+                        <label for="calc-beta">Нефтенасыщенность (βн), доли</label>
                         <input type="number" id="calc-beta" value="0.75" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>Удельный вес (γн), г/см³</label>
+                        <label for="calc-gamma">Удельный вес (γн), г/см³</label>
                         <input type="number" id="calc-gamma" value="0.85" step="0.01">
                     </div>
                     <div class="form-group">
-                        <label>Пересчетный коэфф. (θ), доли</label>
+                        <label for="calc-theta">Пересчетный коэфф. (θ), доли</label>
                         <input type="number" id="calc-theta" value="0.95" step="0.01">
                     </div>
                     <button class="btn btn--outline" id="btn-calc-vol" style="width:100%; margin-top:1rem;">Рассчитать (Qн)</button>
@@ -77,12 +80,69 @@
                 <div class="calc-card">
                     <h3>API → Плотность</h3>
                     <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Перевод API Gravity (США) в кг/м³ (СИ)</p>
+                    <p class="calc-formula">ρ = 141,5 / (°API + 131,5) · 1000</p>
                     <div class="form-group">
-                        <label>API Gravity, °API</label>
+                        <label for="calc-api">API Gravity, °API</label>
                         <input type="number" id="calc-api" value="35">
                     </div>
                     <button class="btn btn--outline" id="btn-calc-api" style="width:100%; margin-top:1rem;">Конвертировать</button>
                     <div class="calc-result" id="res-api">0 кг/м³</div>
+                </div>
+
+                <!-- Дебит по Дюпюи -->
+                <div class="calc-card">
+                    <h3>Дебит скважины (Q)</h3>
+                    <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Формула Дюпюи — плоскорадиальный приток</p>
+                    <p class="calc-formula">Q = 2πkh·ΔP / (μ · ln(R<sub>к</sub>/r<sub>с</sub>))</p>
+                    <div class="form-group">
+                        <label for="calc-k">Проницаемость (k), мД</label>
+                        <input type="number" id="calc-k" value="100" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-dh">Толщина пласта (h), м</label>
+                        <input type="number" id="calc-dh" value="10" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-dp">Депрессия (ΔP), МПа</label>
+                        <input type="number" id="calc-dp" value="5" min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-mu">Вязкость нефти (μ), мПа·с</label>
+                        <input type="number" id="calc-mu" value="2" min="0" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-rk">Радиус контура питания (Rк), м</label>
+                        <input type="number" id="calc-rk" value="250" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-rc">Радиус скважины (rс), м</label>
+                        <input type="number" id="calc-rc" value="0.1" min="0" step="0.01">
+                    </div>
+                    <button class="btn btn--outline" id="btn-calc-darcy" style="width:100%; margin-top:1rem;">Рассчитать (Q)</button>
+                    <div class="calc-result" id="res-darcy">0 м³/сут</div>
+                </div>
+
+                <!-- Конвертер единиц -->
+                <div class="calc-card">
+                    <h3>Конвертер единиц</h3>
+                    <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Промысловые (США) ↔ СИ</p>
+                    <div class="form-group">
+                        <label for="calc-conv-type">Направление перевода</label>
+                        <select id="calc-conv-type">
+                            <option value="psi-mpa">psi → МПа</option>
+                            <option value="mpa-psi">МПа → psi</option>
+                            <option value="atm-mpa">атм → МПа</option>
+                            <option value="bbl-m3">баррель → м³</option>
+                            <option value="m3-bbl">м³ → баррель</option>
+                            <option value="ft-m">фут → м</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="calc-conv-value">Значение</label>
+                        <input type="number" id="calc-conv-value" value="1000">
+                    </div>
+                    <button class="btn btn--outline" id="btn-calc-convert" style="width:100%; margin-top:1rem;">Конвертировать</button>
+                    <div class="calc-result" id="res-convert">—</div>
                 </div>
             </div>
         </div>
@@ -93,7 +153,7 @@
     <footer class="footer">
         <div class="container footer__container">
             <div class="footer__brand">
-                <span class="logo__highlight" style="font-size:1.5rem; font-weight:900;">Petro</span><span style="font-size:1.5rem; font-weight:900;">Learn</span>
+                <span class="footer__logo"><span class="logo__highlight">Petro</span>Learn</span>
                 <p class="footer__credit">Премиальная образовательная платформа для инженеров-разработчиков и геологов.</p>
             </div>
             <div class="footer__links">

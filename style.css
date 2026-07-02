@@ -117,7 +117,6 @@ a {
     color: var(--color-gold);
 }
 .btn--outline:hover {
-    background-color: var(--color-goldglow);
     background: rgba(212, 175, 55, 0.1);
     box-shadow: 0 0 15px var(--color-gold-glow) inset;
     transform: translateY(-2px);
@@ -170,6 +169,10 @@ a {
 .nav__link:hover {
     color: #FFFFFF;
     text-shadow: 0 0 8px rgba(255,255,255,0.4);
+}
+.nav__link.active {
+    color: var(--color-gold);
+    font-weight: 600;
 }
 
 /* БУРГЕР (скрыт на десктопе) */
@@ -922,6 +925,227 @@ a {
     animation: pulse-glow 4s ease-in-out infinite;
 }
 
+/* ПРОГРЕСС-БАР КВИЗА */
+.quiz__progress {
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 1.5rem;
+}
+.quiz__progress-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--color-gold), var(--color-gold-hover));
+    border-radius: 3px;
+    box-shadow: 0 0 10px var(--color-gold-glow);
+    transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ИНДИКАТОРЫ ✓/✗ (доступность: не только цвет) */
+.quiz__btn.correct::after {
+    content: '✓';
+    float: right;
+    font-weight: 800;
+    margin-left: 0.75rem;
+}
+.quiz__btn.wrong::after {
+    content: '✗';
+    float: right;
+    font-weight: 800;
+    margin-left: 0.75rem;
+}
+
+/* РАЗБОР ОШИБОК ПОСЛЕ ТЕСТА */
+.quiz-result__verdict {
+    color: var(--color-text-muted);
+    margin-bottom: 2rem;
+}
+.quiz-result__actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+.quiz-review {
+    text-align: left;
+    margin-top: 3rem;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    padding-top: 2rem;
+}
+.quiz-review__title {
+    font-size: 1.5rem;
+    color: #FFF;
+    margin-bottom: 1.5rem;
+    font-family: var(--font-heading);
+}
+.quiz-review__item {
+    background: rgba(255,255,255,0.02);
+    border: var(--glass-border);
+    border-left: 3px solid #F44336;
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+}
+.quiz-review__question {
+    font-weight: 600;
+    color: var(--color-text-main);
+    margin-bottom: 0.75rem;
+}
+.quiz-review__answer {
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+}
+.quiz-review__answer--user { color: #EF9A9A; }
+.quiz-review__answer--correct { color: #A5D6A7; }
+
+/* ЛУЧШИЙ РЕЗУЛЬТАТ НА КАРТОЧКЕ ТЕСТА */
+.test-module-card__best {
+    color: var(--color-gold);
+}
+
+/* ГЛАВНАЯ: КАРТОЧКИ РАЗДЕЛОВ */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.5rem;
+}
+.feature-card {
+    display: block;
+    background: var(--color-surface);
+    border: var(--glass-border);
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    transition: var(--transition);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+.feature-card:hover {
+    background: var(--color-surface-hover);
+    border-color: rgba(212, 175, 55, 0.4);
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+}
+.feature-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    color: var(--color-gold);
+    margin-bottom: 1.25rem;
+}
+.feature-card__title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: #FFF;
+    margin-bottom: 0.5rem;
+}
+.feature-card__desc {
+    color: var(--color-text-muted);
+    font-size: 0.95rem;
+    line-height: 1.55;
+}
+
+/* ГЛАВНАЯ: ПОЛОСА СТАТИСТИКИ */
+.stats-strip {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1.5rem;
+    margin-top: 4rem;
+    padding: 2.5rem;
+    background: rgba(212, 175, 55, 0.03);
+    border: 1px solid rgba(212, 175, 55, 0.15);
+    border-radius: var(--border-radius);
+}
+.stat__value {
+    font-size: 2.5rem;
+    font-weight: 900;
+    font-family: var(--font-heading);
+    color: var(--color-gold);
+    text-shadow: 0 0 15px var(--color-gold-glow);
+}
+.stat__label {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+/* HERO: ИЛЛЮСТРАЦИЯ ПЛАСТА */
+.hero-illustration {
+    width: 100%;
+    max-width: 460px;
+    height: auto;
+    filter: drop-shadow(0 20px 50px rgba(0,0,0,0.6));
+}
+.hero-illustration .pulse {
+    animation: pulse-glow 4s ease-in-out infinite;
+    transform-origin: center;
+    transform-box: fill-box;
+}
+
+/* КАЛЬКУЛЯТОРЫ: ФОРМУЛЫ */
+.calc-formula {
+    font-family: 'Georgia', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--color-gold);
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px dashed rgba(212, 175, 55, 0.25);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+.form-group select {
+    width: 100%;
+    padding: 1rem;
+    background: rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    font-family: var(--font-main);
+    color: #FFF;
+    font-size: 1.1rem;
+    transition: var(--transition);
+    cursor: pointer;
+}
+.form-group select:focus {
+    outline: none;
+    border-color: var(--color-gold);
+    box-shadow: 0 0 10px rgba(212,175,55,0.2);
+}
+.form-group select option {
+    background: #0A0C10;
+    color: #FFF;
+}
+
+/* ФУТЕР: ЛОГОТИП */
+.footer__logo {
+    font-size: 1.5rem;
+    font-weight: 900;
+    font-family: var(--font-heading);
+    color: #FFF;
+}
+
+/* ДОСТУПНОСТЬ */
+:focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 3px;
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    html { scroll-behavior: auto; }
+    .fade-up { opacity: 1; transform: none; }
+}
+
 /* АДАПТИВНОСТЬ (Планшеты — 900px) */
 @media (max-width: 900px) {
     .hero__container { grid-template-columns: 1fr; text-align: center; }
@@ -1057,6 +1281,15 @@ a {
     .calc-card h3 { font-size: 1.4rem; }
     .form-group input { font-size: 1rem; padding: 0.85rem; }
     .calc-result { font-size: 1.4rem; }
+
+    /* Главная — статистика и карточки */
+    .stats-strip { padding: 1.5rem; gap: 1rem; }
+    .stat__value { font-size: 1.75rem; }
+    .feature-card { padding: 1.5rem; }
+
+    /* Разбор ошибок */
+    .quiz-review__item { padding: 1rem; }
+    .quiz-result__actions { flex-direction: column; }
 
     /* Футер */
     .footer { padding: 3rem 0 1.5rem; }

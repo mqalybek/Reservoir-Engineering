@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Интерактивные тесты по разработке нефтяных и газовых месторождений: базовый уровень и уровень инженера с разбором ошибок.">
     <title>PetroLearn | Тесты</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
-    <style>.nav__link.active { color: var(--color-gold); font-weight: 600; }</style>
 </head>
 <body>
 
@@ -50,9 +52,10 @@
                         <h2 class="test-module-card__title">Базовый тест</h2>
                         <p class="test-module-card__desc">Проверьте знания основных терминов и показателей разработки месторождений.</p>
                         <div class="test-module-card__stats">
-                            <span>30 вопросов</span>
+                            <span id="q-count-basic">30 вопросов</span>
                             <span class="dot">•</span>
                             <span>Фундамент</span>
+                            <span class="test-module-card__best" id="best-score-basic"></span>
                         </div>
                         <button class="btn btn--outline btn--large test-module-card__btn" id="btn-start-basic">Начать базовый тест <span class="arrow">→</span></button>
                     </div>
@@ -73,9 +76,10 @@
                         <h2 class="test-module-card__title">Тест инженера</h2>
                         <p class="test-module-card__desc">Продвинутый уровень: режимы залежи, МУН, способы эксплуатации.</p>
                         <div class="test-module-card__stats">
-                            <span>30 вопросов</span>
+                            <span id="q-count-engineer">43 вопроса</span>
                             <span class="dot">•</span>
                             <span>Профиль</span>
+                            <span class="test-module-card__best" id="best-score-engineer"></span>
                         </div>
                         <button class="btn btn--primary btn--large test-module-card__btn" id="btn-start-engineer">Начать тест инженера <span class="arrow">→</span></button>
                     </div>
@@ -86,7 +90,10 @@
             <div class="quiz-box hidden" id="quiz-box">
                 <div class="quiz__header">
                     <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 30</span>
-                    <span class="quiz__score">Счет: <span id="quiz-score" style="color:var(--color-gold); font-weight:800;">0</span></span>
+                    <span class="quiz__score">Счет: <span id="quiz-score" class="text-gold">0</span></span>
+                </div>
+                <div class="quiz__progress" role="progressbar" aria-label="Прогресс теста">
+                    <div class="quiz__progress-fill" id="quiz-progress-fill"></div>
                 </div>
                 <div class="quiz__nav-dots" id="quiz-nav-dots">
                     <!-- Номера генерируются динамически -->
@@ -107,8 +114,13 @@
             <!-- Экран результатов -->
             <div class="quiz-result hidden" id="quiz-result-screen">
                 <h2 class="section__title">Результаты теста</h2>
-                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> вопросов.</p>
-                <button class="btn btn--outline" id="btn-restart-quiz">Пройти заново</button>
+                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> вопросов (<span id="final-percent" class="text-gold">0%</span>).</p>
+                <p class="quiz-result__verdict" id="final-verdict"></p>
+                <div class="quiz-result__actions">
+                    <button class="btn btn--primary" id="btn-restart-quiz">Пройти заново</button>
+                    <button class="btn btn--outline" id="btn-back-to-tests">К выбору тестов</button>
+                </div>
+                <div class="quiz-review" id="quiz-review"></div>
             </div>
         </div>
     </section>
@@ -118,7 +130,7 @@
     <footer class="footer">
         <div class="container footer__container">
             <div class="footer__brand">
-                <span class="logo__highlight" style="font-size:1.5rem; font-weight:900;">Petro</span><span style="font-size:1.5rem; font-weight:900;">Learn</span>
+                <span class="footer__logo"><span class="logo__highlight">Petro</span>Learn</span>
                 <p class="footer__credit">Премиальная образовательная платформа для инженеров-разработчиков и геологов.</p>
             </div>
             <div class="footer__links">
