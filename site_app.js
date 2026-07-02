@@ -1,3 +1,25 @@
+// ================= АНИМАЦИИ ПРИ СКРОЛЛЕ =================
+// Выполняется первым: контент виден по умолчанию, JS лишь добавляет
+// анимацию появления. Любой сбой ниже по файлу не скроет страницу.
+(function initScrollAnimations() {
+    if (!('IntersectionObserver' in window)) return;
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('show');
+                observer.unobserve(entry.target);
+            }
+        });
+    // threshold: 0 — секция может быть выше экрана (например, справочник
+    // формул), и порог в долях её высоты никогда бы не сработал.
+    }, { threshold: 0, rootMargin: '0px 0px -50px 0px' });
+
+    document.querySelectorAll('.fade-up').forEach(el => {
+        el.classList.add('fade-init');
+        observer.observe(el);
+    });
+})();
+
 // ================= УТИЛИТЫ =================
 function shuffleArray(arr) {
     const a = arr.slice();
@@ -679,7 +701,7 @@ if (btnCalcConvert) {
 // ================= СПРАВОЧНИК ФОРМУЛ =================
 const formulasListEl = document.getElementById('formulas-list');
 
-if (formulasListEl && typeof formulasData !== 'undefined') {
+if (formulasListEl && typeof formulasData !== 'undefined') { try {
     const chipsEl = document.getElementById('formula-chips');
     const formulaSearchEl = document.getElementById('formula-search-input');
     const emptyEl = document.getElementById('formulas-empty');
@@ -687,9 +709,11 @@ if (formulasListEl && typeof formulasData !== 'undefined') {
     let activeCategory = 'all';
     let searchQuery = '';
 
-    // Если KaTeX не загрузился, показываем формулу простым текстом,
-    // чтобы справочник оставался читаемым.
+    // Если KaTeX ещё не загружен, показываем формулу простым текстом,
+    // а после загрузки библиотеки дорендериваем начисто.
     function renderMath(el, latex, displayMode) {
+        el.dataset.latex = latex;
+        if (displayMode) el.dataset.display = '1';
         if (typeof katex === 'undefined') {
             el.textContent = latex.replace(/\\text\{([^}]*)\}/g, '$1').replace(/[\\{}]/g, '');
             return;
@@ -699,6 +723,26 @@ if (formulasListEl && typeof formulasData !== 'undefined') {
         } catch (e) {
             el.textContent = latex;
         }
+    }
+
+    // Асинхронная подгрузка KaTeX: не блокирует страницу, если файл
+    // недоступен или отдаётся медленно.
+    function loadKatexAndRerender() {
+        if (typeof katex !== 'undefined') return;
+        const script = document.createElement('script');
+        script.src = 'vendor/katex/katex.min.js';
+        script.async = true;
+        script.onload = () => {
+            document.querySelectorAll('[data-latex]').forEach(el => {
+                try {
+                    katex.render(el.dataset.latex, el, {
+                        throwOnError: false,
+                        displayMode: el.dataset.display === '1'
+                    });
+                } catch (e) { /* оставляем текстовый вариант */ }
+            });
+        };
+        document.body.appendChild(script);
     }
 
     function buildFormulaCard(formula) {
@@ -827,7 +871,13 @@ if (formulasListEl && typeof formulasData !== 'undefined') {
             applyFormulaFilter();
         });
     }
-}
+
+    applyFormulaFilter();
+    loadKatexAndRerender();
+} catch (e) {
+    // Справочник должен остаться читаемым даже при сбое рендеринга
+    console.error('Ошибка инициализации справочника формул:', e);
+} }
 
 // ================= ГЛАВНАЯ: СТАТИСТИКА =================
 (function renderHomeStats() {
@@ -845,17 +895,3 @@ if (formulasListEl && typeof formulasData !== 'undefined') {
     }
 })();
 
-// ================= АНИМАЦИИ ПРИ СКРОЛЛЕ =================
-document.addEventListener('DOMContentLoaded', () => {
-    const fadeElements = document.querySelectorAll('.fade-up');
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('show');
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
-
-    fadeElements.forEach(el => observer.observe(el));
-});

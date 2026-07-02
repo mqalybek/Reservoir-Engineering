@@ -1088,8 +1088,11 @@ a {
     padding-top: 2rem;
 }
 
-/* АНИМАЦИИ ПРИ СКРОЛЛЕ */
-.fade-up {
+/* АНИМАЦИИ ПРИ СКРОЛЛЕ
+   Контент по умолчанию видим: класс fade-init навешивает JS,
+   и только тогда элемент скрывается перед анимацией появления.
+   Если JS не загрузился — страница остаётся полностью читаемой. */
+.fade-up.fade-init {
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 0.5s ease-out, transform 0.5s ease-out;
@@ -1111,7 +1114,7 @@ a {
         transition-duration: 0.01ms !important;
     }
     html { scroll-behavior: auto; }
-    .fade-up { opacity: 1; transform: none; }
+    .fade-up.fade-init { opacity: 1; transform: none; }
     .hero__wave-line { animation: none; }
 }
 
