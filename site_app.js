@@ -241,9 +241,6 @@ function loadQuestion() {
         const hint = document.createElement('p');
         hint.classList.add('quiz__hint');
         hint.textContent = `(Выберите правильные ответы: ${currentQuestion.answer.length})`;
-        hint.style.color = 'var(--color-gold)';
-        hint.style.marginBottom = '1rem';
-        hint.style.fontSize = '0.9rem';
         optionsEl.appendChild(hint);
     }
 

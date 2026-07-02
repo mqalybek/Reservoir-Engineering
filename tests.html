@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
                 <span class="logo__highlight">Petro</span>Learn
             </a>
             <div class="header__user-info" id="user-rank-badge" title="Ваш ранг обновляется по результатам тестов">
-                <span class="text-gold">◈</span> <span id="rank-text">Новичок</span>
+                <span class="text-accent">◈</span> <span id="rank-text">Новичок</span>
             </div>
             <nav class="nav">
                 <a href="index.html" class="nav__link">Главная</a>
@@ -90,7 +90,7 @@
             <div class="quiz-box hidden" id="quiz-box">
                 <div class="quiz__header">
                     <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 30</span>
-                    <span class="quiz__score">Счет: <span id="quiz-score" class="text-gold">0</span></span>
+                    <span class="quiz__score">Счет: <span id="quiz-score" class="text-accent">0</span></span>
                 </div>
                 <div class="quiz__progress" role="progressbar" aria-label="Прогресс теста">
                     <div class="quiz__progress-fill" id="quiz-progress-fill"></div>
@@ -114,7 +114,7 @@
             <!-- Экран результатов -->
             <div class="quiz-result hidden" id="quiz-result-screen">
                 <h2 class="section__title">Результаты теста</h2>
-                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-gold">0</span> вопросов (<span id="final-percent" class="text-gold">0%</span>).</p>
+                <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-accent">0</span> вопросов (<span id="final-percent" class="text-accent">0%</span>).</p>
                 <p class="quiz-result__verdict" id="final-verdict"></p>
                 <div class="quiz-result__actions">
                     <button class="btn btn--primary" id="btn-restart-quiz">Пройти заново</button>

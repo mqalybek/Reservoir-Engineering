@@ -8,7 +8,7 @@
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;600;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -19,7 +19,7 @@
                 <span class="logo__highlight">Petro</span>Learn
             </a>
             <div class="header__user-info" id="user-rank-badge" title="Ваш ранг обновляется по результатам тестов">
-                <span class="text-gold">◈</span> <span id="rank-text">Новичок</span>
+                <span class="text-accent">◈</span> <span id="rank-text">Новичок</span>
             </div>
             <nav class="nav">
                 <a href="index.html" class="nav__link active">Главная</a>
@@ -38,59 +38,25 @@
 
     <!-- Главный экран (Hero Section) -->
     <section class="hero fade-up">
+        <!-- Ambient-фон: медленно «дышащие» кривые в стиле line chart -->
+        <div class="hero__waves" aria-hidden="true">
+            <svg viewBox="0 0 1440 320" preserveAspectRatio="none">
+                <path class="hero__wave-line hero__wave-line--back"
+                      d="M0,90 C120,70 220,150 340,160 C460,170 540,90 660,85 C780,80 860,170 980,180 C1100,190 1180,110 1300,105 C1360,102 1410,120 1440,125"/>
+                <path class="hero__wave-line"
+                      d="M0,200 C110,195 210,130 330,125 C450,120 530,190 650,200 C770,210 850,140 970,130 C1090,120 1170,185 1290,195 C1350,200 1410,190 1440,185"/>
+            </svg>
+        </div>
         <div class="container hero__container">
-            <div class="hero__content">
-                <span class="hero__label">Нефтяная инженерия</span>
-                <h1 class="hero__title">Разработка нефтяных и газовых <span class="text-gold">месторождений</span></h1>
-                <p class="hero__description">
-                    Изучайте ключевые аспекты моделирования, бурения и эксплуатации скважин. 
-                    Интерактивные тесты и глубокая теория для инженеров.
-                </p>
-                <div class="hero__actions">
-                    <a href="theory.html" class="btn btn--primary btn--large">Перейти к теории</a>
-                    <a href="tests.html" class="btn btn--outline btn--large">Проверить знания</a>
-                </div>
-            </div>
-            <div class="hero__visual">
-                <!-- Геологический разрез: вышка, ствол скважины, пласты и залежь -->
-                <svg class="hero-illustration" viewBox="0 0 460 500" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Схема разреза месторождения со скважиной">
-                    <!-- Буровая вышка -->
-                    <g stroke="#D4AF37" stroke-width="2" stroke-linecap="round">
-                        <path d="M200 130 L230 20 L260 130"/>
-                        <path d="M208 100 L252 100 M214 78 L246 78 M220 56 L240 56 M226 34 L234 34"/>
-                        <path d="M208 100 L246 78 M252 100 L214 78 M214 78 L240 56 M246 78 L220 56"/>
-                        <path d="M190 130 L270 130"/>
-                    </g>
-                    <circle cx="230" cy="20" r="4" fill="#D4AF37"/>
-
-                    <!-- Поверхность земли -->
-                    <path d="M20 140 C 90 132, 150 148, 230 140 C 310 132, 380 148, 440 138" stroke="rgba(255,255,255,0.35)" stroke-width="2"/>
-
-                    <!-- Пласты (страты) -->
-                    <path d="M20 140 C 90 132, 150 148, 230 140 C 310 132, 380 148, 440 138 L440 200 C 370 208, 300 194, 230 202 C 160 210, 90 196, 20 204 Z" fill="rgba(255,255,255,0.03)"/>
-                    <path d="M20 204 C 90 196, 160 210, 230 202 C 300 194, 370 208, 440 200 L440 268 C 360 276, 300 260, 230 268 C 160 276, 100 262, 20 272 Z" fill="rgba(255,255,255,0.05)"/>
-                    <path d="M20 272 C 100 262, 160 276, 230 268 C 300 260, 360 276, 440 268 L440 340 C 370 348, 300 332, 230 340 C 160 348, 90 334, 20 342 Z" fill="rgba(212,175,55,0.04)"/>
-                    <!-- Покрышка -->
-                    <path d="M20 342 C 90 334, 160 348, 230 340 C 300 332, 370 348, 440 340" stroke="rgba(212,175,55,0.35)" stroke-width="2" stroke-dasharray="8 6"/>
-                    <!-- Продуктивный пласт -->
-                    <path d="M20 342 C 90 334, 160 348, 230 340 C 300 332, 370 348, 440 340 L440 420 C 360 428, 300 412, 230 420 C 160 428, 100 414, 20 424 Z" fill="rgba(212,175,55,0.09)"/>
-                    <path d="M20 424 C 100 414, 160 428, 230 420 C 300 412, 360 428, 440 420 L440 480 C 360 488, 300 474, 230 480 C 160 486, 100 474, 20 482 Z" fill="rgba(255,255,255,0.02)"/>
-
-                    <!-- Залежь (свечение) -->
-                    <ellipse class="pulse" cx="230" cy="382" rx="120" ry="30" fill="rgba(212,175,55,0.18)"/>
-                    <ellipse cx="230" cy="382" rx="60" ry="15" fill="rgba(212,175,55,0.25)"/>
-
-                    <!-- Ствол скважины -->
-                    <path d="M226 130 L226 372 M234 130 L234 372" stroke="#D4AF37" stroke-width="2"/>
-                    <path d="M226 372 L234 372" stroke="#D4AF37" stroke-width="2"/>
-                    <!-- Перфорация -->
-                    <g stroke="#F2C84B" stroke-width="2" stroke-linecap="round">
-                        <path d="M222 360 L206 356 M222 372 L204 372 M238 360 L254 356 M238 372 L256 372"/>
-                    </g>
-
-                    <!-- Капля нефти -->
-                    <path d="M230 442 C 230 442, 214 460, 214 470 C 214 479, 221 486, 230 486 C 239 486, 246 479, 246 470 C 246 460, 230 442, 230 442 Z" fill="#D4AF37" opacity="0.85"/>
-                </svg>
+            <span class="hero__label">Нефтегазовый инжиниринг</span>
+            <h1 class="hero__title">Разработка нефтяных и газовых <span class="text-accent">месторождений</span></h1>
+            <p class="hero__description">
+                Изучайте ключевые аспекты моделирования, бурения и эксплуатации скважин.
+                Интерактивные тесты и глубокая теория для инженеров.
+            </p>
+            <div class="hero__actions">
+                <a href="theory.html" class="btn btn--primary btn--large">Перейти к теории</a>
+                <a href="tests.html" class="btn btn--outline btn--large">Проверить знания</a>
             </div>
         </div>
     </section>
@@ -98,7 +64,7 @@
     <!-- Разделы платформы -->
     <section class="section fade-up" id="features">
         <div class="container">
-            <h2 class="section__title text-center">Разделы <span class="text-gold">платформы</span></h2>
+            <h2 class="section__title text-center">Разделы <span class="text-accent">платформы</span></h2>
             <p class="section__subtitle text-center" style="margin-left:auto; margin-right:auto;">Всё необходимое для подготовки: от базовой теории до инженерных расчетов.</p>
 
             <div class="features-grid">
