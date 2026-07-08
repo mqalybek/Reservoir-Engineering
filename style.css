@@ -357,6 +357,12 @@ a {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 1.5rem;
+    /* Резерв места под карточки, которые дорисовывает JS — без него
+       footer виден в первом кадре и прыгает вниз при заполнении (CLS). */
+    min-height: 420px;
+}
+#theory-content {
+    min-height: 100vh;
 }
 .theory-hub-card {
     display: block;
@@ -1009,6 +1015,8 @@ a {
     gap: 1.25rem;
     border-top: 1px solid var(--color-border);
     padding-top: 3rem;
+    /* Резерв места под карточки терминов, которые дорисовывает JS. */
+    min-height: 900px;
 }
 .glossary-item {
     display: grid;
@@ -1116,6 +1124,12 @@ a {
 /* СПРАВОЧНИК ФОРМУЛ */
 .formulas-toolbar {
     margin-bottom: 3rem;
+}
+/* Резервирует место под контент, который дорисовывает JS: список
+   формул растёт вместе с базой знаний, и без этой брони footer
+   виден в первом кадре, а затем резко улетает вниз — CLS. */
+#formulas-list {
+    min-height: 100vh;
 }
 .formula-chips {
     display: flex;
@@ -1406,6 +1420,11 @@ a {
 @media (max-width: 600px) {
     .container { padding: 0 1.25rem; }
     .section { padding: 4rem 0; }
+
+    /* Резервы места под JS-контент: на узких экранах карточки в один
+       столбец занимают меньше высоты на элемент, чем на десктопе. */
+    .glossary-grid { min-height: 2600px; }
+    .theory-hub-grid { min-height: 1500px; }
 
     .section__title { font-size: 1.85rem; }
     .section__subtitle { font-size: 1rem; margin-bottom: 2.5rem; }

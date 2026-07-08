@@ -706,11 +706,12 @@ if (btnCalcConvert) {
 }
 
 // ================= РЕНДЕР МАТЕМАТИКИ (KaTeX) =================
-// Если KaTeX ещё не загружен, показываем формулу простым текстом,
-// а после загрузки библиотеки дорендериваем начисто.
+// katex.min.js подключён обычным <script> перед этим файлом и уже
+// выполнен к моменту вызова renderMath. Текстовый фолбэк остаётся
+// на случай, если файл библиотеки недоступен (страница не должна
+// оставаться пустой) — но без дозагрузки и повторного рендера,
+// чтобы не сдвигать layout после первой отрисовки (CLS).
 function renderMath(el, latex, displayMode) {
-    el.dataset.latex = latex;
-    if (displayMode) el.dataset.display = '1';
     if (typeof katex === 'undefined') {
         el.textContent = latex.replace(/\\text\{([^}]*)\}/g, '$1').replace(/[\\{}]/g, '');
         return;
@@ -720,26 +721,6 @@ function renderMath(el, latex, displayMode) {
     } catch (e) {
         el.textContent = latex;
     }
-}
-
-// Асинхронная подгрузка KaTeX: не блокирует страницу, если файл
-// недоступен или отдаётся медленно.
-function loadKatexAndRerender() {
-    if (typeof katex !== 'undefined') return;
-    const script = document.createElement('script');
-    script.src = 'vendor/katex/katex.min.js';
-    script.async = true;
-    script.onload = () => {
-        document.querySelectorAll('[data-latex]').forEach(el => {
-            try {
-                katex.render(el.dataset.latex, el, {
-                    throwOnError: false,
-                    displayMode: el.dataset.display === '1'
-                });
-            } catch (e) { /* оставляем текстовый вариант */ }
-        });
-    };
-    document.body.appendChild(script);
 }
 
 // ================= СПРАВОЧНИК ФОРМУЛ =================
@@ -881,7 +862,6 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
     }
 
     applyFormulaFilter();
-    loadKatexAndRerender();
 } catch (e) {
     // Справочник должен остаться читаемым даже при сбое рендеринга
     console.error('Ошибка инициализации справочника формул:', e);
@@ -1117,7 +1097,6 @@ if (theoryPageEl && theoryContentEl && typeof theoryData !== 'undefined') { try 
         }
     }
 
-    loadKatexAndRerender();
 } catch (e) {
     console.error('Ошибка рендеринга раздела теории:', e);
 } }
