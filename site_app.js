@@ -522,58 +522,115 @@ if (btnBackToTests) btnBackToTests.addEventListener('click', backToTestSelection
 const glossaryListEl = document.getElementById('glossary-list');
 const searchInput = document.getElementById('glossary-search-input');
 
-function renderGlossary(data, expand) {
-    if (!glossaryListEl) return;
-    glossaryListEl.innerHTML = '';
+if (glossaryListEl && typeof glossaryData !== 'undefined') {
+    const azEl = document.getElementById('glossary-az');
+    const countEl = document.getElementById('glossary-count');
 
-    if (data.length === 0) {
-        const empty = document.createElement('p');
-        empty.classList.add('glossary-empty');
-        empty.textContent = 'Термин не найден.';
-        glossaryListEl.appendChild(empty);
-        return;
+    // Термины отсортированы по алфавиту (кириллица, затем латиница).
+    const sortedTerms = glossaryData.slice().sort((a, b) => a.term.localeCompare(b.term, 'ru'));
+    // Кириллические термины — по своей букве; термины на латинице (PVT и т.п.)
+    // собираются в один бакет «A-Z», чтобы латинская P не дублировала русскую Р.
+    const firstLetter = term => {
+        const c = term[0].toUpperCase();
+        return /[A-Z]/.test(c) ? 'A-Z' : c;
+    };
+
+    let letterFilter = 'all';   // 'all' или конкретная буква
+    let searchQuery = '';
+
+    function renderGlossary(data, expand) {
+        glossaryListEl.innerHTML = '';
+        if (data.length === 0) {
+            const empty = document.createElement('p');
+            empty.classList.add('glossary-empty');
+            empty.textContent = 'Термин не найден.';
+            glossaryListEl.appendChild(empty);
+            return;
+        }
+        data.forEach(item => {
+            const details = document.createElement('details');
+            details.classList.add('glossary-item');
+            if (expand) details.open = true;
+
+            const summary = document.createElement('summary');
+            summary.classList.add('glossary-item__term');
+            summary.textContent = item.term;
+
+            const def = document.createElement('div');
+            def.classList.add('glossary-item__def');
+            def.textContent = item.definition;
+
+            details.append(summary, def);
+            glossaryListEl.appendChild(details);
+        });
     }
 
-    data.forEach(item => {
-        const details = document.createElement('details');
-        details.classList.add('glossary-item');
-        if (expand) details.open = true;
+    function applyGlossaryFilter() {
+        const filtered = sortedTerms.filter(item => {
+            const matchesLetter = letterFilter === 'all' || firstLetter(item.term) === letterFilter;
+            const matchesSearch = !searchQuery ||
+                item.term.toLowerCase().includes(searchQuery) ||
+                item.definition.toLowerCase().includes(searchQuery);
+            return matchesLetter && matchesSearch;
+        });
+        // Раскрываем определения, если фильтр сузил список (поиск или буква).
+        const expand = searchQuery.length > 0 || (letterFilter !== 'all' && filtered.length <= 8);
+        renderGlossary(filtered, expand);
+        if (countEl) {
+            countEl.textContent = filtered.length === sortedTerms.length
+                ? `Всего терминов: ${sortedTerms.length}`
+                : `Показано: ${filtered.length} из ${sortedTerms.length}`;
+        }
+    }
 
-        const summary = document.createElement('summary');
-        summary.classList.add('glossary-item__term');
-        summary.textContent = item.term;
+    // Алфавитный указатель: кнопка «Все» + буквы, реально встречающиеся в терминах.
+    if (azEl) {
+        const letters = Array.from(new Set(sortedTerms.map(item => firstLetter(item.term))))
+            .sort((a, b) => a.localeCompare(b, 'ru'));
+        // Латинский бакет «A-Z» — в конец указателя.
+        const azIndex = letters.indexOf('A-Z');
+        if (azIndex > -1) letters.push(letters.splice(azIndex, 1)[0]);
 
-        const def = document.createElement('div');
-        def.classList.add('glossary-item__def');
-        def.textContent = item.definition;
+        function makeAzButton(label, value) {
+            const btn = document.createElement('button');
+            btn.classList.add('glossary-az__btn');
+            btn.textContent = label;
+            if (value === 'all') btn.classList.add('active');
+            btn.dataset.value = value;
+            btn.addEventListener('click', () => {
+                letterFilter = value;
+                azEl.querySelectorAll('.glossary-az__btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                applyGlossaryFilter();
+            });
+            return btn;
+        }
 
-        details.append(summary, def);
-        glossaryListEl.appendChild(details);
-    });
-}
+        azEl.appendChild(makeAzButton('Все', 'all'));
+        letters.forEach(l => azEl.appendChild(makeAzButton(l, l)));
+    }
 
-if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase().trim();
-        const filtered = glossaryData.filter(item =>
-            item.term.toLowerCase().includes(query) ||
-            item.definition.toLowerCase().includes(query)
-        );
-        // При активном поиске раскрываем определения найденных терминов.
-        renderGlossary(filtered, query.length > 0);
-    });
-}
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            // При активном поиске сбрасываем буквенный фильтр на «Все».
+            if (searchQuery && letterFilter !== 'all' && azEl) {
+                letterFilter = 'all';
+                azEl.querySelectorAll('.glossary-az__btn').forEach(b =>
+                    b.classList.toggle('active', b.dataset.value === 'all'));
+            }
+            applyGlossaryFilter();
+        });
+    }
 
-// Инициализация глоссария (с поддержкой ссылок вида glossary.html?q=термин)
-if (glossaryListEl && typeof glossaryData !== 'undefined') {
+    // Поддержка ссылок вида glossary.html?q=термин (из теории).
     const params = new URLSearchParams(window.location.search);
     const query = (params.get('q') || '').trim();
     if (query && searchInput) {
         searchInput.value = query;
-        searchInput.dispatchEvent(new Event('input'));
-    } else {
-        renderGlossary(glossaryData);
+        searchQuery = query.toLowerCase();
     }
+    applyGlossaryFilter();
 }
 
 // ================= ФЛЭШ-КАРТОЧКИ =================

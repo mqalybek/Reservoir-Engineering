@@ -1012,10 +1012,48 @@ a {
 
 /* ГЛОССАРИЙ */
 .glossary-search {
-    margin-bottom: 3rem;
+    margin-bottom: 1.5rem;
     max-width: 720px;
     margin-left: auto;
     margin-right: auto;
+}
+/* Алфавитный указатель А-Я */
+.glossary-az {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    max-width: 720px;
+    margin: 0 auto 1rem;
+}
+.glossary-az__btn {
+    min-width: 2.1rem;
+    padding: 0.35rem 0.6rem;
+    border-radius: 8px;
+    border: 1px solid var(--color-border);
+    background: var(--color-surface);
+    color: var(--color-text-muted);
+    font-family: var(--font-main);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+.glossary-az__btn:hover {
+    border-color: var(--color-accent);
+    color: var(--color-accent);
+}
+.glossary-az__btn:active { transform: scale(0.94); transition-duration: 0.1s; }
+.glossary-az__btn.active {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: #FFFFFF;
+}
+.glossary-count {
+    text-align: center;
+    color: var(--color-text-muted);
+    font-size: 0.88rem;
+    margin-bottom: 1.5rem;
 }
 .glossary__input {
     width: 100%;
