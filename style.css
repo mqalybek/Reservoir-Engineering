@@ -1034,40 +1034,144 @@ a {
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px var(--color-accent-soft);
 }
+/* Глоссарий — список-аккордеон: термин, по клику раскрывается определение */
 .glossary-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
     border-top: 1px solid var(--color-border);
-    padding-top: 3rem;
-    /* Резерв места под карточки терминов, которые дорисовывает JS. */
-    min-height: 900px;
+    padding-top: 2rem;
+    /* Резерв места под список терминов, который дорисовывает JS. */
+    min-height: 80vh;
 }
 .glossary-item {
-    display: grid;
-    grid-template-columns: 220px 1fr;
-    gap: 1rem;
-    padding: 1.5rem;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: var(--border-radius);
-    transition: var(--transition);
+    border-radius: 10px;
+    transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
 }
 .glossary-item:hover {
     border-color: var(--color-accent-border);
-    box-shadow: var(--shadow-md);
+}
+.glossary-item[open] {
+    border-color: var(--color-accent);
+    box-shadow: var(--shadow-sm);
 }
 .glossary-item__term {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
     font-weight: 600;
     color: var(--color-accent-deep);
-    font-size: 1.05rem;
+    font-size: 1.02rem;
     font-family: var(--font-heading);
+    cursor: pointer;
+    list-style: none;
+}
+.glossary-item__term::-webkit-details-marker { display: none; }
+.glossary-item__term::after {
+    content: '+';
+    flex-shrink: 0;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: var(--color-accent);
+    line-height: 1;
+    transition: transform 0.2s var(--ease-out);
+}
+.glossary-item[open] .glossary-item__term::after {
+    content: '−';
+}
+.glossary-item__term:hover {
+    color: var(--color-accent);
 }
 .glossary-item__def {
     color: var(--color-text-muted);
+    padding: 0 1.25rem 1.25rem;
+    line-height: 1.6;
+}
+.glossary-empty {
+    color: var(--color-text-muted);
+    text-align: center;
+    padding: 2rem 0;
 }
 
 /* КАЛЬКУЛЯТОРЫ */
+/* Экран выбора: плитки калькуляторов */
+.calc-chooser {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.25rem;
+    max-width: 760px;
+    margin: 0 auto;
+}
+.calc-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+    gap: 0.35rem;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--border-radius);
+    padding: 1.75rem;
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    font-family: var(--font-main);
+}
+.calc-tile:hover {
+    border-color: var(--color-accent-border);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-hover);
+}
+.calc-tile:active {
+    transform: scale(0.98);
+    transition-duration: 0.1s;
+}
+.calc-tile__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 10px;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    margin-bottom: 0.75rem;
+}
+.calc-tile__title {
+    font-family: var(--font-heading);
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--color-text-main);
+}
+.calc-tile__desc {
+    font-size: 0.9rem;
+    color: var(--color-text-muted);
+}
+/* Открытый калькулятор */
+.calc-panels {
+    max-width: 620px;
+    margin: 0 auto;
+}
+.calc-back {
+    display: inline-flex;
+    align-items: center;
+    background: none;
+    border: none;
+    color: var(--color-accent);
+    font-family: var(--font-main);
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0.5rem 0;
+    margin-bottom: 1.25rem;
+    transition: color 0.2s var(--ease-out);
+}
+.calc-back:hover { color: var(--color-accent-hover); }
+.calc-back:active { transform: translateX(-2px); }
 .calc-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -1194,29 +1298,55 @@ a {
 .formula-category:first-child .formula-category__title {
     margin-top: 0;
 }
+/* Формула — сворачиваемая карточка: свёрнута = название + формула,
+   раскрыта = плюс переменные, примечание, источник. */
 .formula-card {
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--border-radius);
-    padding: 1.75rem 2rem;
-    margin-bottom: 1.25rem;
+    margin-bottom: 1rem;
     box-shadow: var(--shadow-sm);
-    transition: var(--transition);
+    transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
     scroll-margin-top: 90px;
+    overflow: hidden;
 }
 .formula-card:hover {
     border-color: var(--color-accent-border);
 }
+.formula-card[open] {
+    border-color: var(--color-accent);
+}
+.formula-card__summary {
+    display: block;
+    padding: 1.25rem 1.75rem;
+    cursor: pointer;
+    list-style: none;
+    position: relative;
+}
+.formula-card__summary::-webkit-details-marker { display: none; }
+/* Индикатор сворачивания */
+.formula-card__summary::after {
+    content: '+';
+    position: absolute;
+    top: 1.1rem;
+    right: 1.5rem;
+    font-size: 1.35rem;
+    color: var(--color-accent);
+    line-height: 1;
+}
+.formula-card[open] .formula-card__summary::after {
+    content: '−';
+}
 .formula-card__head {
     display: flex;
-    justify-content: space-between;
     align-items: baseline;
     gap: 1rem;
     flex-wrap: wrap;
     margin-bottom: 0.75rem;
+    padding-right: 1.5rem;
 }
 .formula-card__title {
-    font-size: 1.15rem;
+    font-size: 1.1rem;
     font-weight: 600;
     color: var(--color-text-main);
 }
@@ -1225,19 +1355,26 @@ a {
     font-weight: 600;
     color: var(--color-accent);
     white-space: nowrap;
+    margin-left: auto;
 }
 .formula-card__calc-link:hover {
     color: var(--color-accent-hover);
     text-decoration: underline;
 }
 .formula-math {
-    padding: 1.25rem 1rem;
-    margin-bottom: 1.25rem;
+    padding: 1rem;
     background: var(--color-surface-subtle);
     border-radius: 8px;
     text-align: center;
     overflow-x: auto;
     font-size: 1.05rem;
+}
+.formula-card__body {
+    padding: 1.25rem 1.75rem 1.5rem;
+    margin: 0 1.75rem;
+    border-top: 1px solid var(--color-border);
+    padding-left: 0;
+    padding-right: 0;
 }
 .formula-vars {
     width: 100%;
@@ -1502,13 +1639,15 @@ a {
     .flashcard-controls .btn { flex: 1; font-size: 0.9rem; padding: 0.75rem 0.5rem; }
 
     .glossary__input { font-size: 0.95rem; padding: 1rem 1.25rem; }
-    .glossary-item { padding: 1.25rem; }
+    .glossary-item__term { padding: 0.9rem 1rem; font-size: 0.98rem; }
+    .glossary-item__def { padding: 0 1rem 1rem; }
 
     .calc-card { padding: 1.75rem 1.25rem; }
     .calc-card h3 { font-size: 1.3rem; }
     .calc-result { font-size: 1.3rem; }
 
-    .formula-card { padding: 1.25rem; }
+    .formula-card__summary { padding: 1rem 1.25rem; }
+    .formula-card__body { margin: 0 1.25rem; padding-bottom: 1.25rem; }
     .formula-math { font-size: 0.95rem; padding: 1rem 0.5rem; }
     .formula-vars { font-size: 0.85rem; }
     .formula-vars td { padding: 0.4rem; }

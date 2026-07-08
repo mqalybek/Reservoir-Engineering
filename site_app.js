@@ -522,32 +522,33 @@ if (btnBackToTests) btnBackToTests.addEventListener('click', backToTestSelection
 const glossaryListEl = document.getElementById('glossary-list');
 const searchInput = document.getElementById('glossary-search-input');
 
-function renderGlossary(data) {
+function renderGlossary(data, expand) {
     if (!glossaryListEl) return;
     glossaryListEl.innerHTML = '';
 
     if (data.length === 0) {
         const empty = document.createElement('p');
-        empty.classList.add('text-white');
+        empty.classList.add('glossary-empty');
         empty.textContent = 'Термин не найден.';
         glossaryListEl.appendChild(empty);
         return;
     }
 
     data.forEach(item => {
-        const div = document.createElement('div');
-        div.classList.add('glossary-item');
+        const details = document.createElement('details');
+        details.classList.add('glossary-item');
+        if (expand) details.open = true;
 
-        const termSpan = document.createElement('span');
-        termSpan.classList.add('glossary-item__term');
-        termSpan.textContent = item.term;
+        const summary = document.createElement('summary');
+        summary.classList.add('glossary-item__term');
+        summary.textContent = item.term;
 
-        const defSpan = document.createElement('span');
-        defSpan.classList.add('glossary-item__def');
-        defSpan.textContent = item.definition;
+        const def = document.createElement('div');
+        def.classList.add('glossary-item__def');
+        def.textContent = item.definition;
 
-        div.append(termSpan, defSpan);
-        glossaryListEl.appendChild(div);
+        details.append(summary, def);
+        glossaryListEl.appendChild(details);
     });
 }
 
@@ -558,7 +559,8 @@ if (searchInput) {
             item.term.toLowerCase().includes(query) ||
             item.definition.toLowerCase().includes(query)
         );
-        renderGlossary(filtered);
+        // При активном поиске раскрываем определения найденных терминов.
+        renderGlossary(filtered, query.length > 0);
     });
 }
 
@@ -611,7 +613,53 @@ if (flashcard && typeof glossaryData !== 'undefined') {
     });
 }
 
-// ================= КАЛЬКУЛЯТОРЫ =================
+// ================= КАЛЬКУЛЯТОРЫ: ВЫБОР =================
+// Сначала показываем экран выбора, затем — один выбранный калькулятор.
+// Логика самих расчётов ниже не меняется: элементы всегда в DOM.
+const calcChooserEl = document.getElementById('calc-chooser');
+if (calcChooserEl) {
+    const panelsEl = document.getElementById('calc-panels');
+    const backBtn = document.getElementById('calc-back');
+    const calcCards = Array.from(panelsEl.querySelectorAll('.calc-card'));
+
+    function openCalc(id) {
+        const target = document.getElementById(id);
+        if (!target || !target.classList.contains('calc-card')) return false;
+        calcCards.forEach(c => c.classList.toggle('hidden', c !== target));
+        calcChooserEl.classList.add('hidden');
+        panelsEl.classList.remove('hidden');
+        return true;
+    }
+
+    function showChooser() {
+        panelsEl.classList.add('hidden');
+        calcChooserEl.classList.remove('hidden');
+        if (window.location.hash) {
+            history.replaceState(null, '', window.location.pathname);
+        }
+    }
+
+    calcChooserEl.querySelectorAll('.calc-tile').forEach(tile => {
+        tile.addEventListener('click', () => {
+            if (openCalc(tile.dataset.target)) {
+                history.replaceState(null, '', '#' + tile.dataset.target);
+            }
+        });
+    });
+
+    if (backBtn) backBtn.addEventListener('click', showChooser);
+
+    // Прямая ссылка вида calculators.html#calc-card-darcy (из справочника
+    // формул) — сразу открывает нужный калькулятор.
+    function openCalcFromHash() {
+        const id = window.location.hash.slice(1);
+        if (id) openCalc(id);
+    }
+    openCalcFromHash();
+    window.addEventListener('hashchange', openCalcFromHash);
+}
+
+// ================= КАЛЬКУЛЯТОРЫ: РАСЧЁТЫ =================
 function readNumber(id) {
     const el = document.getElementById(id);
     if (!el) return NaN;
@@ -737,7 +785,9 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
     let searchQuery = '';
 
     function buildFormulaCard(formula) {
-        const card = document.createElement('article');
+        // Сворачиваемая карточка: в свёрнутом виде видно название и
+        // формулу, детали (переменные, примечание, источник) — по клику.
+        const card = document.createElement('details');
         card.classList.add('formula-card');
         card.id = 'formula-' + formula.id;
         card.dataset.category = formula.category;
@@ -746,6 +796,9 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
             formula.note || '',
             (formula.variables || []).map(v => v.name).join(' ')
         ].join(' ').toLowerCase();
+
+        const summary = document.createElement('summary');
+        summary.classList.add('formula-card__summary');
 
         const head = document.createElement('div');
         head.classList.add('formula-card__head');
@@ -760,14 +813,20 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
             link.classList.add('formula-card__calc-link');
             link.href = formula.calcLink.href;
             link.textContent = formula.calcLink.label + ' →';
+            // Клик по ссылке ведёт в калькулятор, а не сворачивает карточку.
+            link.addEventListener('click', (e) => e.stopPropagation());
             head.appendChild(link);
         }
-        card.appendChild(head);
+        summary.appendChild(head);
 
         const math = document.createElement('div');
         math.classList.add('formula-math');
         renderMath(math, formula.latex, true);
-        card.appendChild(math);
+        summary.appendChild(math);
+        card.appendChild(summary);
+
+        const body = document.createElement('div');
+        body.classList.add('formula-card__body');
 
         if (formula.variables && formula.variables.length) {
             const table = document.createElement('table');
@@ -782,23 +841,24 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
                 unitsCell.classList.add('formula-vars__units');
                 unitsCell.textContent = v.units;
             });
-            card.appendChild(table);
+            body.appendChild(table);
         }
 
         if (formula.note) {
             const note = document.createElement('p');
             note.classList.add('formula-note');
             note.textContent = formula.note;
-            card.appendChild(note);
+            body.appendChild(note);
         }
 
         if (formula.source) {
             const source = document.createElement('p');
             source.classList.add('formula-source');
             source.textContent = 'Источник: ' + formula.source;
-            card.appendChild(source);
+            body.appendChild(source);
         }
 
+        card.appendChild(body);
         return card;
     }
 
@@ -864,6 +924,20 @@ if (formulasListEl && typeof formulasData !== 'undefined') { try {
     }
 
     applyFormulaFilter();
+
+    // Переход по якорю #formula-xxx (например, из теории): раскрыть и
+    // подсветить нужную карточку.
+    function openFormulaFromHash() {
+        const hash = window.location.hash;
+        if (!hash.startsWith('#formula-')) return;
+        const target = document.getElementById(hash.slice(1));
+        if (target && target.tagName === 'DETAILS') {
+            target.open = true;
+            target.scrollIntoView({ block: 'start' });
+        }
+    }
+    openFormulaFromHash();
+    window.addEventListener('hashchange', openFormulaFromHash);
 } catch (e) {
     // Справочник должен остаться читаемым даже при сбое рендеринга
     console.error('Ошибка инициализации справочника формул:', e);
