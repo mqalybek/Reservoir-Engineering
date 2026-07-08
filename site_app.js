@@ -245,8 +245,8 @@ function updateNavDots() {
 function updateProgressBar() {
     if (!progressFillEl) return;
     const answered = userAnswers.filter((ans, idx) => isAnswerLocked(ans, currentQuizData[idx])).length;
-    const percent = currentQuizData.length ? (answered / currentQuizData.length) * 100 : 0;
-    progressFillEl.style.width = percent + '%';
+    const fraction = currentQuizData.length ? answered / currentQuizData.length : 0;
+    progressFillEl.style.transform = 'scaleX(' + fraction + ')';
 }
 
 function loadQuestion() {
@@ -585,10 +585,12 @@ const btnNextCard = document.getElementById('btn-next-card');
 function renderFlashcard(index) {
     if (!fcTerm || typeof glossaryData === 'undefined') return;
     flashcard.classList.remove('is-flipped');
+    // Свап текста в момент, когда карточка повёрнута ребром (≈середина
+    // переворота 0.45s) — смена контента остаётся невидимой.
     setTimeout(() => {
         fcTerm.textContent = glossaryData[index].term;
         fcDef.textContent = glossaryData[index].definition;
-    }, 150);
+    }, 220);
 }
 
 if (flashcard && typeof glossaryData !== 'undefined') {
