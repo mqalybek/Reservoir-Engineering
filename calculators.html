@@ -43,9 +43,43 @@
             <h2 class="section__title">Инженерные Расчеты</h2>
             <p class="section__subtitle" style="margin: 0 auto 4rem auto;">Быстрые калькуляторы запасов и свойств пластовых флюидов.</p>
             
-            <div class="calc-grid">
+            <!-- Экран выбора калькулятора -->
+            <div class="calc-chooser" id="calc-chooser">
+                <button class="calc-tile" data-target="calc-card-vol">
+                    <span class="calc-tile__icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 12h.01M12 12h.01M16 12h.01M8 16h.01M12 16h.01M16 16h.01"/></svg>
+                    </span>
+                    <span class="calc-tile__title">Запасы нефти</span>
+                    <span class="calc-tile__desc">Объёмный метод (Qн)</span>
+                </button>
+                <button class="calc-tile" data-target="calc-card-api">
+                    <span class="calc-tile__icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2s7 8 7 13a7 7 0 0 1-14 0c0-5 7-13 7-13z"/></svg>
+                    </span>
+                    <span class="calc-tile__title">API → Плотность</span>
+                    <span class="calc-tile__desc">Перевод °API в кг/м³</span>
+                </button>
+                <button class="calc-tile" data-target="calc-card-darcy">
+                    <span class="calc-tile__icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>
+                    </span>
+                    <span class="calc-tile__title">Дебит скважины</span>
+                    <span class="calc-tile__desc">Формула Дюпюи (Q)</span>
+                </button>
+                <button class="calc-tile" data-target="calc-card-convert">
+                    <span class="calc-tile__icon">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16l-3-3M20 17H4l3 3"/></svg>
+                    </span>
+                    <span class="calc-tile__title">Конвертер единиц</span>
+                    <span class="calc-tile__desc">psi, баррели, футы ↔ СИ</span>
+                </button>
+            </div>
+
+            <!-- Открытый калькулятор -->
+            <div class="calc-panels hidden" id="calc-panels">
+                <button class="calc-back" id="calc-back">← Все расчёты</button>
                 <!-- Калькулятор STOOIP -->
-                <div class="calc-card" id="calc-card-vol">
+                <div class="calc-card hidden" id="calc-card-vol">
                     <h3>Запасы Нефти (Qн)</h3>
                     <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Объемный метод (практика РК и СНГ)</p>
                     <p class="calc-formula">Q<sub>н</sub> = F · h · m · β<sub>н</sub> · γ<sub>н</sub> · θ</p>
@@ -78,7 +112,7 @@
                 </div>
 
                 <!-- Конвертер API -->
-                <div class="calc-card" id="calc-card-api">
+                <div class="calc-card hidden" id="calc-card-api">
                     <h3>API → Плотность</h3>
                     <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Перевод API Gravity (США) в кг/м³ (СИ)</p>
                     <p class="calc-formula">ρ = 141,5 / (°API + 131,5) · 1000</p>
@@ -91,7 +125,7 @@
                 </div>
 
                 <!-- Дебит по Дюпюи -->
-                <div class="calc-card" id="calc-card-darcy">
+                <div class="calc-card hidden" id="calc-card-darcy">
                     <h3>Дебит скважины (Q)</h3>
                     <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Формула Дюпюи — плоскорадиальный приток</p>
                     <p class="calc-formula">Q = 2πkh·ΔP / (μ · ln(R<sub>к</sub>/r<sub>с</sub>))</p>
@@ -124,7 +158,7 @@
                 </div>
 
                 <!-- Конвертер единиц -->
-                <div class="calc-card" id="calc-card-convert">
+                <div class="calc-card hidden" id="calc-card-convert">
                     <h3>Конвертер единиц</h3>
                     <p style="font-size:0.9rem; margin-bottom:1.5rem; color:var(--color-text-muted);">Промысловые (США) ↔ СИ</p>
                     <div class="form-group">
