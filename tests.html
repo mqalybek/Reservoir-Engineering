@@ -85,13 +85,36 @@
                         <button class="btn btn--primary btn--large test-module-card__btn" id="btn-start-engineer">Начать тест инженера <span class="arrow">→</span></button>
                     </div>
                 </div>
+
+                <!-- Тест по ГДИС (PTA) -->
+                <div class="test-module-card">
+                    <div class="test-module-card__badge">Практика</div>
+                    <div class="test-module-card__bg"></div>
+                    <div class="test-module-card__icon">
+                        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"/>
+                            <path d="M7 12c2 3 3-5 5-2s2 6 4 3 3-6 3-6"/>
+                        </svg>
+                    </div>
+                    <div class="test-module-card__content">
+                        <h2 class="test-module-card__title">Тест по ГДИС (PTA)</h2>
+                        <p class="test-module-card__desc">Диагностические графики, режимы течения, планирование исследований скважин. Источник: KAPPA Engineering.</p>
+                        <div class="test-module-card__stats">
+                            <span id="q-count-gdis">25 вопросов</span>
+                            <span class="dot">•</span>
+                            <span>Без ключа ответа</span>
+                            <span class="test-module-card__best" id="best-score-gdis"></span>
+                        </div>
+                        <button class="btn btn--outline btn--large test-module-card__btn" id="btn-start-gdis">Начать тест по ГДИС <span class="arrow">→</span></button>
+                    </div>
+                </div>
             </div>
             
             <!-- Скрытый блок самого квиза -->
             <div class="quiz-box hidden" id="quiz-box">
                 <div class="quiz__header">
                     <span class="quiz__counter" id="quiz-counter">Вопрос 1 из 30</span>
-                    <span class="quiz__score">Счет: <span id="quiz-score" class="text-accent">0</span></span>
+                    <span class="quiz__score" id="quiz-score-wrap">Счет: <span id="quiz-score" class="text-accent">0</span></span>
                 </div>
                 <div class="quiz__progress" role="progressbar" aria-label="Прогресс теста">
                     <div class="quiz__progress-fill" id="quiz-progress-fill"></div>
@@ -116,6 +139,7 @@
             <div class="quiz-result hidden" id="quiz-result-screen">
                 <h2 class="section__title">Результаты теста</h2>
                 <p class="quiz-result__text">Вы ответили правильно на <span id="final-score" class="text-accent">0</span> вопросов (<span id="final-percent" class="text-accent">0%</span>).</p>
+                <p class="quiz-result__text hidden" id="quiz-result-ungraded-note">Ответы записаны — правильные варианты для этого теста ещё не добавлены.</p>
                 <p class="quiz-result__verdict" id="final-verdict"></p>
                 <div class="quiz-result__actions">
                     <button class="btn btn--primary" id="btn-restart-quiz">Пройти заново</button>
@@ -148,6 +172,7 @@
     </footer>
 
     <script src="site_data.js"></script>
+    <script src="gdis_quiz_data.js"></script>
     <script src="site_app.js"></script>
 </body>
 </html>
