@@ -131,6 +131,7 @@ if (navBurger && navMenu) {
 // ================= КВИЗ И ТЕСТЫ =================
 const btnStartBasic = document.getElementById('btn-start-basic');
 const btnStartEngineer = document.getElementById('btn-start-engineer');
+const btnStartGdis = document.getElementById('btn-start-gdis');
 const quizStartScreen = document.getElementById('quiz-start-screen');
 const quizBox = document.getElementById('quiz-box');
 const quizResultScreen = document.getElementById('quiz-result-screen');
@@ -157,35 +158,75 @@ let userAnswers = [];
 let currentQuizData = [];
 let currentTestType = 'basic';
 
+// Тип вопроса: 'single' | 'multi' | 'matrix'. Явное поле `type` в данных
+// имеет приоритет; иначе определяем по форме answer (обратная совместимость
+// со старыми данными quizDataBasic/quizDataEngineer, где type не указан).
+function getQuestionType(q) {
+    if (q.type) return q.type;
+    return Array.isArray(q.answer) ? 'multi' : 'single';
+}
+
+// Правильный ответ ещё не известен (answer: null) — вопрос показывается,
+// но не участвует в подсчёте баллов и не подсвечивается верно/неверно.
+function hasKnownAnswer(q) {
+    return q.answer !== null && q.answer !== undefined;
+}
+
+function isMultiQuestion(q) {
+    return getQuestionType(q) === 'multi';
+}
+
 // Готовит копию теста: перемешивает вопросы и варианты ответов,
 // пересчитывая индексы правильных ответов под новый порядок.
+// Матричные вопросы (type: 'matrix') не перемешиваются — их строки/
+// столбцы образуют таблицу, порядок которой важен для восприятия.
 function prepareQuizData(sourceData) {
     return shuffleArray(sourceData).map(q => {
+        if (getQuestionType(q) === 'matrix') return q;
         const order = shuffleArray(q.options.map((_, i) => i));
         return {
             question: q.question,
             options: order.map(i => q.options[i]),
-            answer: Array.isArray(q.answer)
-                ? q.answer.map(a => order.indexOf(a))
-                : order.indexOf(q.answer)
+            answer: !hasKnownAnswer(q)
+                ? null
+                : (Array.isArray(q.answer) ? q.answer.map(a => order.indexOf(a)) : order.indexOf(q.answer)),
+            type: q.type
         };
     });
 }
 
-function isMultiQuestion(q) {
-    return Array.isArray(q.answer);
-}
-
-// Состояние ответа: для одиночных вопросов — number | null,
-// для вопросов с несколькими ответами — { selected: number[], locked: boolean } | null.
+// Состояние ответа: single — number | null; multi — { selected: number[], locked: boolean } | null;
+// matrix — { [название строки]: название столбца } | null.
+// «Заблокирован» здесь означает «зафиксирован как окончательный» для целей
+// точек навигации/прогресс-бара — не обязательно запрещает дальнейшее
+// редактирование (см. isEditable) для вопросов без известного ответа.
 function isAnswerLocked(answerState, question) {
     if (answerState === null || answerState === undefined) return false;
-    return isMultiQuestion(question) ? answerState.locked : true;
+    const type = getQuestionType(question);
+    if (type === 'matrix') {
+        return question.rows.every(r => answerState[r] !== undefined);
+    }
+    if (type === 'multi') {
+        return hasKnownAnswer(question) ? answerState.locked : answerState.selected.length > 0;
+    }
+    return true;
+}
+
+// Можно ли ещё менять ответ. Пока правильный ответ не известен —
+// разрешаем менять выбор сколько угодно раз (нечего блокировать).
+function isEditable(answerState, question) {
+    if (!hasKnownAnswer(question)) return true;
+    return !isAnswerLocked(answerState, question);
 }
 
 function isAnswerCorrect(answerState, question) {
     if (!isAnswerLocked(answerState, question)) return false;
-    if (isMultiQuestion(question)) {
+    if (!hasKnownAnswer(question)) return false;
+    const type = getQuestionType(question);
+    if (type === 'matrix') {
+        return question.rows.every(r => answerState[r] === question.answer[r]);
+    }
+    if (type === 'multi') {
         return question.answer.every(a => answerState.selected.includes(a)) &&
                answerState.selected.every(a => question.answer.includes(a));
     }
@@ -197,6 +238,8 @@ function startQuiz(type) {
 
     const source = currentTestType === 'engineer'
         ? (typeof quizDataEngineer !== 'undefined' ? quizDataEngineer : [])
+        : currentTestType === 'gdis'
+        ? (typeof quizDataGdis !== 'undefined' ? quizDataGdis : [])
         : (typeof quizDataBasic !== 'undefined' ? quizDataBasic : []);
     if (!source.length) return;
 
@@ -204,6 +247,12 @@ function startQuiz(type) {
     score = 0;
     currentQuizData = prepareQuizData(source);
     userAnswers = new Array(currentQuizData.length).fill(null);
+
+    // Пока ни у одного вопроса теста нет известного ответа, счёт
+    // во время прохождения не показываем — «Счёт: 0» выглядел бы
+    // так, будто все ответы неверны.
+    const scoreWrapEl = document.getElementById('quiz-score-wrap');
+    if (scoreWrapEl) scoreWrapEl.classList.toggle('hidden', !currentQuizData.some(hasKnownAnswer));
 
     quizStartScreen.classList.add('hidden');
     quizResultScreen.classList.add('hidden');
@@ -235,9 +284,15 @@ function updateNavDots() {
         dot.className = 'quiz-dot'; // сброс
         if (index === currentQuestionIndex) {
             dot.classList.add('active');
-        } else if (isAnswerLocked(userAnswers[index], currentQuizData[index])) {
-            const correct = isAnswerCorrect(userAnswers[index], currentQuizData[index]);
-            dot.classList.add(correct ? 'answered_correct' : 'answered_wrong');
+            return;
+        }
+        const state = userAnswers[index];
+        const q = currentQuizData[index];
+        if (!isAnswerLocked(state, q)) return;
+        if (!hasKnownAnswer(q)) {
+            dot.classList.add('answered_neutral');
+        } else {
+            dot.classList.add(isAnswerCorrect(state, q) ? 'answered_correct' : 'answered_wrong');
         }
     });
 }
@@ -257,9 +312,18 @@ function loadQuestion() {
     questionEl.textContent = currentQuestion.question;
 
     const answerState = userAnswers[currentQuestionIndex];
-    const isMulti = isMultiQuestion(currentQuestion);
+    const type = getQuestionType(currentQuestion);
+    const graded = hasKnownAnswer(currentQuestion);
 
-    if (isMulti) {
+    if (type === 'matrix') {
+        renderMatrixQuestion(currentQuestion, answerState, graded);
+        updateButtonsVisibility();
+        return;
+    }
+
+    const isMulti = type === 'multi';
+
+    if (isMulti && graded) {
         const hint = document.createElement('p');
         hint.classList.add('quiz__hint');
         hint.textContent = `(Выберите правильные ответы: ${currentQuestion.answer.length})`;
@@ -277,7 +341,20 @@ function loadQuestion() {
         button.addEventListener('click', () => selectAnswer(index, button));
         optionsEl.appendChild(button);
 
-        // Восстановление состояния при возврате к вопросу
+        if (!graded) {
+            // Ответ ещё не задан: только подсвечиваем текущий выбор,
+            // без «верно/неверно» и без блокировки — можно менять свободно.
+            if (isMulti) {
+                if (answerState && answerState.selected.includes(index)) {
+                    button.classList.add('selected');
+                }
+            } else if (answerState === index) {
+                button.classList.add('selected');
+            }
+            return;
+        }
+
+        // Восстановление состояния при возврате к вопросу (с известным ответом)
         if (answerState !== null && answerState !== undefined) {
             if (!isMulti) {
                 button.disabled = true;
@@ -301,6 +378,90 @@ function loadQuestion() {
     });
 
     updateButtonsVisibility();
+}
+
+// Матричный вопрос (тип 'matrix'): таблица rows × columns, одна
+// радиокнопка на пересечении на строку. Общий name у радио в строке
+// даёт нативный «выбор одного варианта» и доступность из коробки.
+function renderMatrixQuestion(question, answerState, graded) {
+    if (question.image) {
+        const figure = document.createElement('figure');
+        figure.classList.add('quiz-question-figure');
+        const img = document.createElement('img');
+        img.src = question.image;
+        img.alt = question.imageAlt || '';
+        img.loading = 'lazy';
+        img.classList.add('quiz-question-image');
+        figure.appendChild(img);
+        if (question.imageCaption) {
+            const caption = document.createElement('figcaption');
+            caption.textContent = question.imageCaption;
+            figure.appendChild(caption);
+        }
+        optionsEl.appendChild(figure);
+    }
+
+    const wrap = document.createElement('div');
+    wrap.classList.add('quiz-matrix-wrap');
+    const table = document.createElement('table');
+    table.classList.add('quiz-matrix');
+
+    const thead = table.createTHead();
+    const headRow = thead.insertRow();
+    headRow.insertCell();
+    question.columns.forEach(col => {
+        const th = document.createElement('th');
+        th.textContent = col;
+        headRow.appendChild(th);
+    });
+
+    const tbody = table.createTBody();
+    const state = answerState || {};
+    const editable = isEditable(answerState, question);
+
+    question.rows.forEach((rowName, rowIdx) => {
+        const tr = tbody.insertRow();
+        const rowTh = document.createElement('th');
+        rowTh.scope = 'row';
+        rowTh.textContent = rowName;
+        tr.appendChild(rowTh);
+
+        question.columns.forEach(colName => {
+            const td = tr.insertCell();
+            const label = document.createElement('label');
+            label.classList.add('quiz-matrix__cell');
+
+            const input = document.createElement('input');
+            input.type = 'radio';
+            input.name = 'matrix-' + currentQuestionIndex + '-' + rowIdx;
+            input.checked = state[rowName] === colName;
+            input.disabled = !editable;
+            input.addEventListener('change', () => selectMatrixCell(rowName, colName));
+            label.appendChild(input);
+
+            if (graded) {
+                const isCorrectCell = question.answer && question.answer[rowName] === colName;
+                const isUserCell = state[rowName] === colName;
+                if (isCorrectCell) label.classList.add('correct');
+                else if (isUserCell) label.classList.add('wrong');
+            }
+
+            td.appendChild(label);
+        });
+    });
+
+    wrap.appendChild(table);
+    optionsEl.appendChild(wrap);
+}
+
+function selectMatrixCell(row, col) {
+    const question = currentQuizData[currentQuestionIndex];
+    const state = userAnswers[currentQuestionIndex];
+    if (!isEditable(state, question)) return;
+    if (!userAnswers[currentQuestionIndex]) userAnswers[currentQuestionIndex] = {};
+    userAnswers[currentQuestionIndex][row] = col;
+    afterAnswerLocked();
+    loadQuestion();
 }
 
 function updateButtonsVisibility() {
@@ -329,8 +490,29 @@ function resetState() {
     }
 }
 
+// Ответ ещё не задан: свободно переключаем выбор (multi — как чекбоксы,
+// single — как радио), без блокировки и подсветки правильности.
+function selectUngraded(type, selectedIndex) {
+    const idx = currentQuestionIndex;
+    if (type === 'multi') {
+        if (!userAnswers[idx]) userAnswers[idx] = { selected: [] };
+        const selected = userAnswers[idx].selected;
+        const pos = selected.indexOf(selectedIndex);
+        if (pos === -1) selected.push(selectedIndex); else selected.splice(pos, 1);
+    } else {
+        userAnswers[idx] = selectedIndex;
+    }
+    afterAnswerLocked();
+    loadQuestion();
+}
+
 function selectAnswer(selectedIndex, selectedBtn) {
     const currentQuestion = currentQuizData[currentQuestionIndex];
+
+    if (!hasKnownAnswer(currentQuestion)) {
+        selectUngraded(getQuestionType(currentQuestion), selectedIndex);
+        return;
+    }
 
     if (isMultiQuestion(currentQuestion)) {
         if (!userAnswers[currentQuestionIndex]) {
@@ -384,8 +566,10 @@ function afterAnswerLocked() {
 }
 
 function recalculateScore() {
-    score = userAnswers.reduce((acc, ans, idx) =>
-        acc + (isAnswerCorrect(ans, currentQuizData[idx]) ? 1 : 0), 0);
+    score = userAnswers.reduce((acc, ans, idx) => {
+        const q = currentQuizData[idx];
+        return (hasKnownAnswer(q) && isAnswerCorrect(ans, q)) ? acc + 1 : acc;
+    }, 0);
     scoreEl.textContent = score;
 }
 
@@ -414,49 +598,89 @@ function formatAnswer(question, indices) {
     return indices.map(i => question.options[i]).join('; ');
 }
 
+function formatMatrixPairs(question, pairs) {
+    return question.rows
+        .map(r => `${r} → ${pairs && pairs[r] !== undefined ? pairs[r] : '—'}`)
+        .join('; ');
+}
+
+function formatUserAnswer(q, state) {
+    const type = getQuestionType(q);
+    if (type === 'matrix') {
+        return state ? formatMatrixPairs(q, state) : '— (нет ответа)';
+    }
+    if (type === 'multi') {
+        return (state && state.selected && state.selected.length)
+            ? formatAnswer(q, state.selected)
+            : '— (нет ответа)';
+    }
+    return (state === null || state === undefined) ? '— (нет ответа)' : q.options[state];
+}
+
+function formatCorrectAnswer(q) {
+    const type = getQuestionType(q);
+    if (type === 'matrix') return formatMatrixPairs(q, q.answer);
+    return formatAnswer(q, type === 'multi' ? q.answer : [q.answer]);
+}
+
 function renderReview() {
     if (!reviewEl) return;
     reviewEl.innerHTML = '';
 
-    const mistakes = currentQuizData
-        .map((q, idx) => ({ q, state: userAnswers[idx] }))
-        .filter(({ q, state }) => !isAnswerCorrect(state, q));
+    const mistakes = [];
+    const ungradedAnswered = [];
 
-    if (mistakes.length === 0) return;
-
-    const title = document.createElement('h3');
-    title.classList.add('quiz-review__title');
-    title.textContent = `Разбор ошибок (${mistakes.length})`;
-    reviewEl.appendChild(title);
-
-    mistakes.forEach(({ q, state }) => {
-        const item = document.createElement('div');
-        item.classList.add('quiz-review__item');
-
-        const questionP = document.createElement('p');
-        questionP.classList.add('quiz-review__question');
-        questionP.textContent = q.question;
-        item.appendChild(questionP);
-
-        const userP = document.createElement('p');
-        userP.classList.add('quiz-review__answer', 'quiz-review__answer--user');
-        if (state === null || state === undefined) {
-            userP.textContent = 'Ваш ответ: — (нет ответа)';
-        } else if (isMultiQuestion(q)) {
-            userP.textContent = 'Ваш ответ: ' + (state.selected.length ? formatAnswer(q, state.selected) : '— (нет ответа)');
-        } else {
-            userP.textContent = 'Ваш ответ: ' + q.options[state];
+    currentQuizData.forEach((q, idx) => {
+        const state = userAnswers[idx];
+        if (hasKnownAnswer(q)) {
+            if (!isAnswerCorrect(state, q)) mistakes.push({ q, state });
+        } else if (isAnswerLocked(state, q)) {
+            ungradedAnswered.push({ q, state });
         }
-        item.appendChild(userP);
-
-        const correctP = document.createElement('p');
-        correctP.classList.add('quiz-review__answer', 'quiz-review__answer--correct');
-        const correctIndices = isMultiQuestion(q) ? q.answer : [q.answer];
-        correctP.textContent = 'Правильный ответ: ' + formatAnswer(q, correctIndices);
-        item.appendChild(correctP);
-
-        reviewEl.appendChild(item);
     });
+
+    function appendSection(title, items, extraItemClass) {
+        const heading = document.createElement('h3');
+        heading.classList.add('quiz-review__title');
+        heading.textContent = title;
+        reviewEl.appendChild(heading);
+
+        items.forEach(({ q, state }) => {
+            const item = document.createElement('div');
+            item.classList.add('quiz-review__item');
+            if (extraItemClass) item.classList.add(extraItemClass);
+
+            const questionP = document.createElement('p');
+            questionP.classList.add('quiz-review__question');
+            questionP.textContent = q.question;
+            item.appendChild(questionP);
+
+            const userP = document.createElement('p');
+            userP.classList.add('quiz-review__answer', 'quiz-review__answer--user');
+            userP.textContent = 'Ваш ответ: ' + formatUserAnswer(q, state);
+            item.appendChild(userP);
+
+            if (hasKnownAnswer(q)) {
+                const correctP = document.createElement('p');
+                correctP.classList.add('quiz-review__answer', 'quiz-review__answer--correct');
+                correctP.textContent = 'Правильный ответ: ' + formatCorrectAnswer(q);
+                item.appendChild(correctP);
+            }
+
+            reviewEl.appendChild(item);
+        });
+    }
+
+    if (mistakes.length > 0) {
+        appendSection(`Разбор ошибок (${mistakes.length})`, mistakes);
+    }
+    if (ungradedAnswered.length > 0) {
+        appendSection(
+            `Ваши ответы (${ungradedAnswered.length}) — ключ ответа ещё не добавлен`,
+            ungradedAnswered,
+            'quiz-review__item--neutral'
+        );
+    }
 }
 
 function showResults() {
@@ -464,15 +688,31 @@ function showResults() {
     quizResultScreen.classList.remove('hidden');
 
     recalculateScore();
-    const total = currentQuizData.length;
-    const percent = total ? Math.round((score / total) * 100) : 0;
+    const gradedCount = currentQuizData.filter(hasKnownAnswer).length;
 
-    finalScoreEl.textContent = `${score} из ${total}`;
-    if (finalPercentEl) finalPercentEl.textContent = percent + '%';
-    if (finalVerdictEl) finalVerdictEl.textContent = getVerdict(percent);
+    const resultTextEl = document.querySelector('.quiz-result__text');
+    const ungradedNoteEl = document.getElementById('quiz-result-ungraded-note');
+
+    if (gradedCount === 0) {
+        // Ни у одного вопроса пока нет ключа ответа — показываем
+        // нейтральное сообщение вместо «0 из N», которое выглядело бы
+        // как провал.
+        if (resultTextEl) resultTextEl.classList.add('hidden');
+        if (ungradedNoteEl) ungradedNoteEl.classList.remove('hidden');
+        if (finalVerdictEl) {
+            finalVerdictEl.textContent = 'Вы прошли все вопросы. Как только появятся правильные ответы, результат будет посчитан автоматически.';
+        }
+    } else {
+        if (resultTextEl) resultTextEl.classList.remove('hidden');
+        if (ungradedNoteEl) ungradedNoteEl.classList.add('hidden');
+        const percent = Math.round((score / gradedCount) * 100);
+        finalScoreEl.textContent = `${score} из ${gradedCount}`;
+        if (finalPercentEl) finalPercentEl.textContent = percent + '%';
+        if (finalVerdictEl) finalVerdictEl.textContent = getVerdict(percent);
+    }
 
     renderReview();
-    saveBestResult(currentTestType, score, total);
+    if (gradedCount > 0) saveBestResult(currentTestType, score, gradedCount);
     updateRankUI();
     renderBestScores();
     quizResultScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -495,7 +735,8 @@ function pluralizeQuestions(n) {
 function renderBestScores() {
     const config = [
         { type: 'basic', data: typeof quizDataBasic !== 'undefined' ? quizDataBasic : null },
-        { type: 'engineer', data: typeof quizDataEngineer !== 'undefined' ? quizDataEngineer : null }
+        { type: 'engineer', data: typeof quizDataEngineer !== 'undefined' ? quizDataEngineer : null },
+        { type: 'gdis', data: typeof quizDataGdis !== 'undefined' ? quizDataGdis : null }
     ];
     config.forEach(({ type, data }) => {
         const countEl = document.getElementById('q-count-' + type);
@@ -512,6 +753,7 @@ renderBestScores();
 
 if (btnStartBasic) btnStartBasic.addEventListener('click', () => startQuiz('basic'));
 if (btnStartEngineer) btnStartEngineer.addEventListener('click', () => startQuiz('engineer'));
+if (btnStartGdis) btnStartGdis.addEventListener('click', () => startQuiz('gdis'));
 if (btnNext) btnNext.addEventListener('click', handleNextButton);
 if (btnPrev) btnPrev.addEventListener('click', handlePrevButton);
 if (btnFinish) btnFinish.addEventListener('click', showResults);
