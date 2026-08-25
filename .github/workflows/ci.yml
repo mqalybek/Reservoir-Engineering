@@ -1,0 +1,34 @@
+name: Проверка сайта
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    # Быстрая проверка данных: ключи ответов, обязательные поля,
+    # существование целей у всех перекрёстных ссылок. Без браузера.
+    name: Данные
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: node tests/validate-data.js
+
+  smoke:
+    # Прогон всех страниц в headless-Chromium.
+    name: Страницы
+    runs-on: ubuntu-latest
+    needs: validate
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - run: npm install --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - run: node tests/smoke.js
