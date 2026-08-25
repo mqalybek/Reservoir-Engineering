@@ -1,0 +1,14 @@
+{
+  "name": "petrolearn",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Справочник и тренажёр инженера-нефтяника: теория, формулы, глоссарий, тесты и калькуляторы",
+  "scripts": {
+    "validate": "node tests/validate-data.js",
+    "smoke": "node tests/smoke.js",
+    "test": "npm run validate && npm run smoke"
+  },
+  "devDependencies": {
+    "playwright": "^1.49.0"
+  }
+}

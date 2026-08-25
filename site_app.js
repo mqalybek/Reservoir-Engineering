@@ -31,7 +31,9 @@ function shuffleArray(arr) {
 }
 
 // ================= ХРАНИЛИЩЕ РЕЗУЛЬТАТОВ =================
-const TEST_TYPES = ['basic', 'engineer'];
+// Все тесты, результаты которых учитываются в ранге. Ранг берёт лучший
+// процент среди них, поэтому новый тест может ранг только поднять.
+const TEST_TYPES = ['basic', 'engineer', 'gdis'];
 
 function bestResultKey(type) {
     return 'petrolearn.best.' + type;
@@ -184,13 +186,16 @@ function prepareQuizData(sourceData) {
     return shuffleArray(sourceData).map(q => {
         if (getQuestionType(q) === 'matrix') return q;
         const order = shuffleArray(q.options.map((_, i) => i));
+        // Копируем вопрос целиком и переопределяем только те два поля,
+        // которые зависят от нового порядка вариантов. Перечислять поля
+        // поимённо нельзя: всё, что не попало бы в список (image,
+        // explanation, source, id), молча терялось бы по пути к экрану.
         return {
-            question: q.question,
+            ...q,
             options: order.map(i => q.options[i]),
             answer: !hasKnownAnswer(q)
                 ? null
-                : (Array.isArray(q.answer) ? q.answer.map(a => order.indexOf(a)) : order.indexOf(q.answer)),
-            type: q.type
+                : (Array.isArray(q.answer) ? q.answer.map(a => order.indexOf(a)) : order.indexOf(q.answer))
         };
     });
 }
@@ -1391,6 +1396,138 @@ if (theoryPageEl && theoryContentEl && typeof theoryData !== 'undefined') { try 
             note.classList.add('theory-note');
             appendRichText(note, block.text);
             return note;
+        }
+
+        // Маркированный или нумерованный список.
+        // { type: 'list', ordered: true, items: ['…', '…'] }
+        if (block.type === 'list') {
+            const list = document.createElement(block.ordered ? 'ol' : 'ul');
+            list.classList.add('theory-list');
+            (block.items || []).forEach(item => {
+                const li = document.createElement('li');
+                appendRichText(li, String(item));
+                list.appendChild(li);
+            });
+            return list;
+        }
+
+        // Иллюстрация с подписью.
+        // { type: 'image', src: '…', alt: '…', caption: '…' }
+        if (block.type === 'image') {
+            const figure = document.createElement('figure');
+            figure.classList.add('theory-figure');
+            const img = document.createElement('img');
+            img.src = block.src;
+            img.alt = block.alt || '';
+            img.loading = 'lazy';
+            figure.appendChild(img);
+            if (block.caption) {
+                const caption = document.createElement('figcaption');
+                appendRichText(caption, block.caption);
+                figure.appendChild(caption);
+            }
+            return figure;
+        }
+
+        // Список литературы к теме.
+        // { type: 'reference', title: '…', items: ['Dake L.P. …', …] }
+        if (block.type === 'reference') {
+            const box = document.createElement('div');
+            box.classList.add('theory-refs');
+            const heading = document.createElement('h4');
+            heading.classList.add('theory-refs__title');
+            heading.textContent = block.title || 'Источники';
+            box.appendChild(heading);
+            const list = document.createElement('ul');
+            (block.items || []).forEach(item => {
+                const li = document.createElement('li');
+                if (typeof item === 'string') {
+                    li.textContent = item;
+                } else {
+                    li.textContent = item.text || '';
+                    if (item.href) {
+                        const link = document.createElement('a');
+                        link.href = item.href;
+                        link.textContent = item.text || item.href;
+                        link.rel = 'noopener';
+                        li.textContent = '';
+                        li.appendChild(link);
+                    }
+                }
+                list.appendChild(li);
+            });
+            box.appendChild(list);
+            return box;
+        }
+
+        // Разобранный пример расчёта — «дано → решение → ответ».
+        // Самый ценный формат для инженера, поэтому шаги нумеруются,
+        // а ответ выделяется отдельно.
+        // { type: 'example', title, ref, given, steps: [строка | {text, latex}], result }
+        if (block.type === 'example') {
+            const box = document.createElement('div');
+            box.classList.add('theory-example');
+
+            const heading = document.createElement('h4');
+            heading.classList.add('theory-example__title');
+            heading.textContent = block.title || 'Пример расчёта';
+            box.appendChild(heading);
+
+            if (block.given) {
+                const given = document.createElement('p');
+                given.classList.add('theory-example__given');
+                const label = document.createElement('span');
+                label.classList.add('theory-example__label');
+                label.textContent = 'Дано: ';
+                given.appendChild(label);
+                appendRichText(given, block.given);
+                box.appendChild(given);
+            }
+
+            if (Array.isArray(block.steps) && block.steps.length) {
+                const steps = document.createElement('ol');
+                steps.classList.add('theory-example__steps');
+                block.steps.forEach(step => {
+                    const li = document.createElement('li');
+                    if (typeof step === 'string') {
+                        appendRichText(li, step);
+                    } else {
+                        if (step.text) appendRichText(li, step.text);
+                        if (step.latex) {
+                            const math = document.createElement('div');
+                            math.classList.add('theory-example__math');
+                            renderMath(math, step.latex, true);
+                            li.appendChild(math);
+                        }
+                    }
+                    steps.appendChild(li);
+                });
+                box.appendChild(steps);
+            }
+
+            if (block.result) {
+                const result = document.createElement('p');
+                result.classList.add('theory-example__result');
+                const label = document.createElement('span');
+                label.classList.add('theory-example__label');
+                label.textContent = 'Ответ: ';
+                result.appendChild(label);
+                appendRichText(result, block.result);
+                box.appendChild(result);
+            }
+
+            if (block.ref) {
+                const link = document.createElement('a');
+                link.classList.add('theory-example__ref');
+                link.href = 'formulas.html#formula-' + block.ref;
+                const formula = (typeof formulasData !== 'undefined')
+                    ? formulasData.find(f => f.id === block.ref)
+                    : null;
+                link.textContent = (formula ? formula.title : 'Формула') + ' в справочнике →';
+                box.appendChild(link);
+            }
+
+            return box;
         }
 
         return document.createDocumentFragment();
