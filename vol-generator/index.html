@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VOL Generator — конвертер добычи в формат Petrel</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="app-header">
+  <h1>VOL Generator</h1>
+  <p class="subtitle">Добыча (Access/Excel) → плотность → .vol файл для Petrel</p>
+</header>
+
+<main class="app-main">
+
+  <!-- Шаг 1: загрузка файла -->
+  <section class="card" id="step-upload">
+    <h2><span class="step-num">1</span> Загрузить базу добычи</h2>
+    <p class="hint">Excel-файл (.xlsx/.xls), выгруженный из Access. Первая строка листа должна быть заголовками колонок.</p>
+    <label class="file-drop" id="fileDrop">
+      <input type="file" id="fileInput" accept=".xlsx,.xls,.csv">
+      <span id="fileDropLabel">Выберите файл или перетащите сюда</span>
+    </label>
+    <div id="uploadStatus" class="status"></div>
+  </section>
+
+  <!-- Шаг 2: сопоставление колонок -->
+  <section class="card hidden" id="step-mapping">
+    <h2><span class="step-num">2</span> Сопоставить колонки</h2>
+    <p class="hint">Укажите, какая колонка исходного файла что означает.</p>
+
+    <div class="field-row">
+      <label>Лист</label>
+      <select id="sheetSelect"></select>
+    </div>
+
+    <div class="mapping-grid" id="mappingGrid"></div>
+
+    <div class="field-row">
+      <label class="checkbox-label">
+        <input type="checkbox" id="combinedIdCheckbox" checked>
+        Идентификатор скважины+объекта в одной колонке в формате <code>СКВАЖИНА:ОБЪЕКТ</code> (например <code>UVN_1:PT_1</code>)
+      </label>
+    </div>
+
+    <button class="btn btn-primary" id="applyMappingBtn">Применить и разобрать данные</button>
+    <div id="mappingStatus" class="status"></div>
+  </section>
+
+  <!-- Шаг 3: плотность по объектам -->
+  <section class="card hidden" id="step-density">
+    <h2><span class="step-num">3</span> Плотность нефти по объектам</h2>
+    <p class="hint">Для перевода добычи нефти из тонн в кубометры: Объём[м³] = Масса[т] / Плотность[т/м³]. Укажите плотность для каждого объекта.</p>
+    <table class="density-table">
+      <thead><tr><th>Объект</th><th>Скважин</th><th>Строк</th><th>Плотность, т/м³</th></tr></thead>
+      <tbody id="densityTableBody"></tbody>
+    </table>
+
+    <div class="field-row">
+      <label>Правило свода суток работы (DAYS) при нескольких объектах на скважину</label>
+      <select id="daysRule">
+        <option value="max" selected>Максимум по объектам</option>
+        <option value="sum">Сумма по объектам</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" id="applyDensityBtn">Рассчитать</button>
+    <div id="densityStatus" class="status"></div>
+  </section>
+
+  <!-- Шаг 4: превью и генерация -->
+  <section class="card hidden" id="step-preview">
+    <h2><span class="step-num">4</span> Проверка и выгрузка .vol</h2>
+
+    <div class="summary" id="summaryBox"></div>
+
+    <div class="table-scroll">
+      <table class="preview-table" id="previewTable"></table>
+    </div>
+
+    <div class="field-row">
+      <label>Имя файла</label>
+      <input type="text" id="outFileName" value="output.vol">
+    </div>
+
+    <button class="btn btn-success" id="downloadBtn">Скачать .vol</button>
+    <div id="downloadStatus" class="status"></div>
+  </section>
+
+</main>
+
+<footer class="app-footer">Работает полностью в браузере — данные никуда не отправляются.</footer>
+
+<script src="vendor/xlsx.full.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
