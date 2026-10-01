@@ -221,6 +221,79 @@ function group(title) { console.log('\n' + title); }
     check('некорректный ввод даёт понятную ошибку',
         (await page.locator('#res-darcy').innerText()).includes('Проверьте'));
 
+    // Ввод так, как его набирает человек: посимвольно, с клавиатуры.
+    async function typeInto(selector, text) {
+        await page.locator(selector).click({ clickCount: 3 });
+        await page.keyboard.press('Backspace');
+        await page.keyboard.type(text);
+    }
+
+    // Десятичная запятая. Раньше Chromium молча выбрасывал запятую из
+    // type="number": «0,2» превращалось в 2, и запасы получались в 10 раз
+    // больше без всякого предупреждения.
+    await page.goto(url('calculators.html') + '#calc-card-vol');
+    await typeInto('#calc-f', '1000'); await typeInto('#calc-h', '10');
+    await typeInto('#calc-m', '0,2'); await typeInto('#calc-beta', '0,75');
+    await typeInto('#calc-gamma', '0,85'); await typeInto('#calc-theta', '0,95');
+    await page.click('#btn-calc-vol');
+    const volComma = await page.locator('#res-vol').innerText();
+    check('запятая как разделитель: запасы = 1 211 тыс. т (' + volComma + ')',
+        volComma.replace(/\s/g, ' ') === '1 211 тыс. т');
+    await typeInto('#calc-m', '0.2');
+    await page.click('#btn-calc-vol');
+    check('точка как разделитель даёт тот же результат',
+        (await page.locator('#res-vol').innerText()).replace(/\s/g, ' ') === '1 211 тыс. т');
+
+    // Физические диапазоны
+    await typeInto('#calc-m', '2');
+    await page.click('#btn-calc-vol');
+    const poroErr = await page.locator('#res-vol').innerText();
+    check('пористость 2 (200%) отклоняется (' + poroErr + ')', poroErr.includes('Проверьте') && poroErr.includes('0 до 1'));
+    await typeInto('#calc-m', '0,2'); await typeInto('#calc-h', 'абв');
+    await page.click('#btn-calc-vol');
+    check('нечисловой ввод отклоняется', (await page.locator('#res-vol').innerText()).includes('Проверьте'));
+    await typeInto('#calc-h', '1e308'); await typeInto('#calc-f', '1e308');
+    await page.click('#btn-calc-vol');
+    check('переполнение не выводится как «∞»', !(await page.locator('#res-vol').innerText()).includes('∞'));
+
+    // Цвет ошибки — читаемый токен дизайн-системы, а не захардкоженный
+    // светло-розовый с контрастом 1,9:1.
+    await typeInto('#calc-f', '1000'); await typeInto('#calc-h', '-5');
+    await page.click('#btn-calc-vol');
+    const errColor = await page.locator('#res-vol').evaluate(el => getComputedStyle(el).color);
+    const tokenColor = await page.evaluate(() => {
+        const probe = document.createElement('span');
+        probe.style.color = 'var(--color-error-text)';
+        document.body.appendChild(probe);
+        const c = getComputedStyle(probe).color; probe.remove(); return c;
+    });
+    check('цвет ошибки = --color-error-text (' + errColor + ')', errColor === tokenColor);
+    check('у результата ошибки есть класс состояния',
+        await page.locator('#res-vol.calc-result--error').count() === 1);
+
+    await page.goto(url('calculators.html') + '#calc-card-api');
+    await typeInto('#calc-api', '-131');
+    await page.click('#btn-calc-api');
+    check('API = −131 отклоняется как нефизичный', (await page.locator('#res-api').innerText()).includes('Проверьте'));
+    await typeInto('#calc-api', '35');
+    await page.click('#btn-calc-api');
+    const apiRes = await page.locator('#res-api').innerText();
+    check('плотность в формате ru-RU (' + apiRes + ')', apiRes.replace(/\s/g, ' ') === '849,8 кг/м³');
+
+    // Смена только хеша не перезагружает страницу — задаём все поля явно.
+    await page.goto(url('calculators.html') + '#calc-card-darcy');
+    await typeInto('#calc-k', '100'); await typeInto('#calc-dh', '10');
+    await typeInto('#calc-dp', '5'); await typeInto('#calc-mu', '2');
+    await typeInto('#calc-rk', '250'); await typeInto('#calc-rc', '0,1');
+    await page.click('#btn-calc-darcy');
+    const darcyRu = await page.locator('#res-darcy').innerText();
+    check('Дюпюи в формате ru-RU с запятой (' + darcyRu + ')', darcyRu === '171,2 м³/сут');
+
+    await page.goto(url('calculators.html') + '#calc-card-convert');
+    await typeInto('#calc-conv-value', '1,5');
+    await page.click('#btn-calc-convert');
+    check('конвертер понимает запятую', (await page.locator('#res-convert').innerText()).startsWith('0,0103'));
+
     // ---------------- Подготовка вопросов ----------------
     // Страж регресса: prepareQuizData раньше пересобирал вопрос по белому
     // списку полей и терял image / explanation / source / id. Проверяем,
@@ -252,6 +325,58 @@ function group(title) { console.log('\n' + title); }
     check('id сохраняется', prep.id === 999);
     check('ключ ответа пересчитан под новый порядок вариантов', prep.answerPointsToSameOption);
 
+    // ---------------- Поля вопроса на экране ----------------
+    // Подменяем базовый тест одним пробным вопросом со всеми
+    // необязательными полями и проходим его как пользователь.
+    group('Поля вопроса на экране');
+    await page.goto(url('tests.html'));
+    await page.evaluate(() => {
+        localStorage.clear();
+        quizDataBasic.length = 0;
+        quizDataBasic.push({
+            id: 1, type: 'single',
+            question: 'Пробный вопрос с картинкой',
+            options: ['верный', 'неверный'],
+            answer: 0,
+            image: 'assets/gdis-diagnostic-plot.png',
+            imageAlt: 'пробная картинка',
+            explanation: 'Потому что так устроено пробное пояснение.',
+            source: 'Пробный источник, с. 42'
+        });
+    });
+    await page.click('#btn-start-basic');
+    check('картинка показана у обычного вопроса', await page.locator('#quiz-options .quiz-question-image').isVisible());
+    check('alt картинки передан', (await page.locator('.quiz-question-image').count()) === 1 &&
+        (await page.locator('.quiz-question-image').getAttribute('alt')) === 'пробная картинка');
+    await page.locator('.quiz__btn', { hasText: 'неверный' }).click();
+    const explNow = page.locator('#quiz-options .quiz-explanation');
+    check('пояснение появляется сразу после ответа', await explNow.isVisible());
+    check('в пояснении есть источник', (await explNow.innerText()).includes('Пробный источник, с. 42'));
+    await page.click('#btn-finish-quiz');
+    const reviewExpl = page.locator('.quiz-review .quiz-explanation');
+    check('пояснение есть в разборе ошибок', (await reviewExpl.count()) === 1 &&
+        (await reviewExpl.innerText()).includes('пробное пояснение'));
+
+    // Вопрос без пояснения не получает пустой блок
+    await page.goto(url('tests.html'));
+    await page.click('#btn-start-basic');
+    const firstBtn = page.locator('#quiz-options .quiz__btn').first();
+    await firstBtn.click();
+    check('без explanation пустой блок пояснения не рисуется',
+        await page.locator('#quiz-options .quiz-explanation').count() === 0);
+
+    // Пустая попытка не считается результатом
+    await page.goto(url('tests.html'));
+    await page.evaluate(() => localStorage.clear());
+    await page.reload();
+    await page.click('#btn-start-basic');
+    await page.locator('.quiz-dot').last().click();
+    await page.click('#btn-finish-quiz');
+    check('завершение без ответов не сохраняется как «лучший»',
+        await page.evaluate(() => localStorage.getItem('petrolearn.best.basic')) === null);
+    await page.click('#btn-back-to-tests');
+    check('на карточке нет «Лучший: 0/30»', (await page.locator('#best-score-basic').innerText()) === '');
+
     // ---------------- Ранги ----------------
     group('Ранги');
     const rankUsesGdis = await page.evaluate(() => {
@@ -261,6 +386,45 @@ function group(title) { console.log('\n' + title); }
     });
     check('результат по ГДИС влияет на ранг (' + rankUsesGdis + ')', rankUsesGdis === 'Эксперт 👑');
     await page.evaluate(() => localStorage.clear());
+
+    // ---------------- Мобильная ширина ----------------
+    // Если содержимое шире экрана, мобильный браузер расширяет layout-
+    // вьюпорт (innerWidth растёт), а при overflow-x: hidden на body текст
+    // просто срезается справа. Поэтому сравниваем innerWidth с шириной
+    // устройства — getBoundingClientRect здесь врёт из-за масштабирования.
+    group('Мобильная ширина');
+    const ALL_PAGES = ['index.html', 'theory.html', 'theory-fluids.html', 'theory-reservoirs.html',
+        'theory-wells.html', 'theory-development.html', 'theory-waterflooding.html', 'theory-reserves.html',
+        'formulas.html', 'tests.html', 'glossary.html', 'calculators.html'];
+    for (const width of [320, 375]) {
+        const mctx = await browser.newContext({
+            viewport: { width, height: 740 }, isMobile: true, hasTouch: true
+        });
+        const mp = await mctx.newPage();
+        mp.on('pageerror', e => consoleErrors.push(`pageerror @${width}px: ` + e.message));
+        const wide = [];
+        for (const f of ALL_PAGES) {
+            await mp.goto(url(f));
+            await mp.waitForTimeout(100);
+            const iw = await mp.evaluate(() => window.innerWidth);
+            if (iw > width) wide.push(`${f}=${iw}`);
+        }
+        check(`${width}px: ни одна страница не шире экрана ${wide.length ? JSON.stringify(wide) : ''}`, wide.length === 0);
+
+        // Все вопросы ГДИС: матричная таблица должна прокручиваться внутри
+        // своей обёртки, а кнопки навигации — переноситься, а не вылезать.
+        await mp.goto(url('tests.html'));
+        await mp.click('#btn-start-gdis');
+        const wideQ = [];
+        for (let i = 0; i < 25; i++) {
+            await mp.locator('.quiz-dot').nth(i).click();
+            const iw = await mp.evaluate(() => window.innerWidth);
+            if (iw > width) wideQ.push(`№${i + 1}=${iw}`);
+        }
+        check(`${width}px: ни один вопрос теста не шире экрана ${wideQ.length ? JSON.stringify(wideQ) : ''}`,
+            wideQ.length === 0);
+        await mctx.close();
+    }
 
     // ---------------- Общее ----------------
     group('Общее');

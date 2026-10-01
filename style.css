@@ -377,7 +377,7 @@ a {
 /* ТЕОРИЯ: ХАБ РАЗДЕЛОВ */
 .theory-hub-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
     gap: 1.5rem;
     /* Резерв места под карточки, которые дорисовывает JS — без него
        footer виден в первом кадре и прыгает вниз при заполнении (CLS). */
@@ -943,6 +943,43 @@ a {
     font-size: 0.85rem;
     color: var(--color-text-muted);
 }
+/* Навигация по вопросам. Раньше стили были инлайном без переноса,
+   и на экране 375px кнопки «Предыдущий» + «Следующий» вылезали за
+   карточку, растягивая страницу. */
+.quiz__footer {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+.quiz__footer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-left: auto;
+}
+@media (max-width: 480px) {
+    .quiz__footer .btn { padding: 0.75rem 1.1rem; }
+}
+.quiz-explanation {
+    margin-top: 0.5rem;
+    padding: 1rem 1.2rem;
+    background: var(--color-surface-subtle);
+    border-left: 3px solid var(--color-accent);
+    border-radius: 0 8px 8px 0;
+    font-size: 0.95rem;
+    line-height: 1.65;
+    color: var(--color-text-main);
+}
+.quiz-explanation p { margin: 0; }
+.quiz-explanation p + p { margin-top: 0.5rem; }
+.quiz-explanation strong { color: var(--color-accent-deep); }
+.quiz-explanation__source {
+    font-size: 0.85rem;
+    color: var(--color-text-muted);
+}
+.quiz-review__item .quiz-explanation { margin-top: 0.75rem; }
 .quiz-matrix-wrap {
     overflow-x: auto;
     margin-bottom: 2rem;
@@ -1061,7 +1098,7 @@ a {
 /* КАРТОЧКИ ВЫБОРА ТЕСТА */
 .test-modules-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
     gap: 2rem;
     margin-bottom: 4rem;
 }
@@ -1490,6 +1527,10 @@ a {
     transition: var(--transition);
 }
 .form-group select { cursor: pointer; }
+.form-group input[aria-invalid="true"] {
+    border-color: var(--color-error);
+    background: var(--color-error-bg);
+}
 .form-group input:focus,
 .form-group select:focus {
     outline: none;
@@ -1508,6 +1549,17 @@ a {
     border: 1px solid var(--color-accent-border);
     border-radius: 8px;
     font-variant-numeric: tabular-nums;
+}
+
+/* Ошибка ввода: читаемый токен вместо прежнего #EF9A9A (контраст 1,9:1) */
+.calc-result--error {
+    color: var(--color-error-text);
+    background: var(--color-error-bg);
+    border-color: var(--color-error);
+    font-size: 1rem;
+    font-family: var(--font-main);
+    font-weight: 500;
+    line-height: 1.5;
 }
 
 /* СПРАВОЧНИК ФОРМУЛ */
@@ -1783,7 +1835,10 @@ a {
 @media (max-width: 900px) {
     .hero__title { font-size: 2.6rem; }
 
-    .theory-layout { grid-template-columns: 1fr; gap: 1.5rem; }
+    /* minmax(0, 1fr), а не 1fr: у 1fr минимум — ширина самого широкого
+       содержимого (таблица, формула), и колонка раздувалась до 775px на
+       экране 375px. Широкие блоки сами прокручиваются внутри обёрток. */
+    .theory-layout { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
     .theory-toc { position: static; }
 
     .calc-grid, .glossary-grid { grid-template-columns: 1fr; }
