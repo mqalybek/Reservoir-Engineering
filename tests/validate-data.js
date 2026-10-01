@@ -62,6 +62,17 @@ QUIZZES.forEach(([name, quiz]) => {
             seenIds.add(q.id);
         }
 
+        // Необязательные поля, общие для всех типов вопросов
+        if (q.image !== undefined) {
+            if (!fs.existsSync(path.join(ROOT, q.image))) fail(`${at}: файл изображения не найден — ${q.image}`);
+            if (!q.imageAlt) warn(`${at}: у изображения нет imageAlt (доступность)`);
+        }
+        ['explanation', 'source', 'imageAlt', 'imageCaption'].forEach(field => {
+            if (q[field] !== undefined && (typeof q[field] !== 'string' || !q[field].trim())) {
+                fail(`${at}: поле ${field} должно быть непустой строкой`);
+            }
+        });
+
         const type = q.type || (Array.isArray(q.answer) ? 'multi' : 'single');
         if (!['single', 'multi', 'matrix'].includes(type)) {
             fail(`${at}: неизвестный тип вопроса «${type}»`);
@@ -91,11 +102,6 @@ QUIZZES.forEach(([name, quiz]) => {
                         }
                     });
                 }
-            }
-            if (q.image) {
-                const img = path.join(ROOT, q.image);
-                if (!fs.existsSync(img)) fail(`${at}: файл изображения не найден — ${q.image}`);
-                if (!q.imageAlt) warn(`${at}: у изображения нет imageAlt (доступность)`);
             }
             return;
         }

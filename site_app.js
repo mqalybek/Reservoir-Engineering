@@ -322,11 +322,14 @@ function loadQuestion() {
 
     if (type === 'matrix') {
         renderMatrixQuestion(currentQuestion, answerState, graded);
+        renderExplanationIfLocked(currentQuestion, answerState);
         updateButtonsVisibility();
         return;
     }
 
     const isMulti = type === 'multi';
+
+    renderQuestionImage(currentQuestion);
 
     if (isMulti && graded) {
         const hint = document.createElement('p');
@@ -382,29 +385,65 @@ function loadQuestion() {
         }
     });
 
+    renderExplanationIfLocked(currentQuestion, answerState);
     updateButtonsVisibility();
+}
+
+// Иллюстрация к вопросу — у любого типа вопроса, не только у матричного.
+function renderQuestionImage(question) {
+    if (!question.image) return;
+    const figure = document.createElement('figure');
+    figure.classList.add('quiz-question-figure');
+    const img = document.createElement('img');
+    img.src = question.image;
+    img.alt = question.imageAlt || '';
+    img.loading = 'lazy';
+    img.classList.add('quiz-question-image');
+    figure.appendChild(img);
+    if (question.imageCaption) {
+        const caption = document.createElement('figcaption');
+        caption.textContent = question.imageCaption;
+        figure.appendChild(caption);
+    }
+    optionsEl.appendChild(figure);
+}
+
+// Пояснение «почему так» и источник. Показывается только у вопросов
+// с известным ответом и только когда ответ уже зафиксирован — иначе
+// пояснение подсказывало бы ответ заранее.
+function renderExplanation(question, container) {
+    if (!hasKnownAnswer(question)) return;
+    if (!question.explanation && !question.source) return;
+    if (container.querySelector(':scope > .quiz-explanation')) return;
+
+    const box = document.createElement('div');
+    box.classList.add('quiz-explanation');
+    if (question.explanation) {
+        const text = document.createElement('p');
+        text.classList.add('quiz-explanation__text');
+        const label = document.createElement('strong');
+        label.textContent = 'Пояснение. ';
+        text.append(label, question.explanation);
+        box.appendChild(text);
+    }
+    if (question.source) {
+        const source = document.createElement('p');
+        source.classList.add('quiz-explanation__source');
+        source.textContent = 'Источник: ' + question.source;
+        box.appendChild(source);
+    }
+    container.appendChild(box);
+}
+
+function renderExplanationIfLocked(question, answerState) {
+    if (isAnswerLocked(answerState, question)) renderExplanation(question, optionsEl);
 }
 
 // Матричный вопрос (тип 'matrix'): таблица rows × columns, одна
 // радиокнопка на пересечении на строку. Общий name у радио в строке
 // даёт нативный «выбор одного варианта» и доступность из коробки.
 function renderMatrixQuestion(question, answerState, graded) {
-    if (question.image) {
-        const figure = document.createElement('figure');
-        figure.classList.add('quiz-question-figure');
-        const img = document.createElement('img');
-        img.src = question.image;
-        img.alt = question.imageAlt || '';
-        img.loading = 'lazy';
-        img.classList.add('quiz-question-image');
-        figure.appendChild(img);
-        if (question.imageCaption) {
-            const caption = document.createElement('figcaption');
-            caption.textContent = question.imageCaption;
-            figure.appendChild(caption);
-        }
-        optionsEl.appendChild(figure);
-    }
+    renderQuestionImage(question);
 
     const wrap = document.createElement('div');
     wrap.classList.add('quiz-matrix-wrap');
@@ -545,6 +584,7 @@ function selectAnswer(selectedIndex, selectedBtn) {
                 if (currentQuestion.answer.includes(i)) button.classList.add('correct');
                 button.disabled = true;
             });
+            renderExplanation(currentQuestion, optionsEl);
             afterAnswerLocked();
         }
         return;
@@ -560,6 +600,7 @@ function selectAnswer(selectedIndex, selectedBtn) {
         button.disabled = true;
     });
 
+    renderExplanation(currentQuestion, optionsEl);
     afterAnswerLocked();
 }
 
@@ -670,6 +711,7 @@ function renderReview() {
                 correctP.classList.add('quiz-review__answer', 'quiz-review__answer--correct');
                 correctP.textContent = 'Правильный ответ: ' + formatCorrectAnswer(q);
                 item.appendChild(correctP);
+                renderExplanation(q, item);
             }
 
             reviewEl.appendChild(item);
@@ -717,7 +759,11 @@ function showResults() {
     }
 
     renderReview();
-    if (gradedCount > 0) saveBestResult(currentTestType, score, gradedCount);
+    // Пустая попытка («Завершить» без единого ответа) — не результат:
+    // иначе на карточке теста навсегда оставалось бы «Лучший: 0/30».
+    const answeredGraded = currentQuizData.filter((q, idx) =>
+        hasKnownAnswer(q) && isAnswerLocked(userAnswers[idx], q)).length;
+    if (gradedCount > 0 && answeredGraded > 0) saveBestResult(currentTestType, score, gradedCount);
     updateRankUI();
     renderBestScores();
     quizResultScreen.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -964,51 +1010,103 @@ if (calcChooserEl) {
 }
 
 // ================= КАЛЬКУЛЯТОРЫ: РАСЧЁТЫ =================
-function readNumber(id) {
+// Поля калькуляторов — type="text" с inputmode="decimal": у type="number"
+// Chromium молча выбрасывает десятичную запятую, и «0,2» превращалось в 2.
+// Поэтому число разбираем сами и принимаем и запятую, и точку.
+function parseDecimal(raw) {
+    const s = String(raw).trim()
+        .replace(/[\s  ]/g, '')   // пробелы-разделители разрядов
+        .replace(',', '.');
+    if (!/^[-+]?(\d+\.?\d*|\.\d+)(e[-+]?\d+)?$/i.test(s)) return NaN;
+    return Number(s);
+}
+
+function formatNumber(value, fractionDigits) {
+    return value.toLocaleString('ru-RU', {
+        minimumFractionDigits: fractionDigits,
+        maximumFractionDigits: fractionDigits
+    });
+}
+
+// Читает поле и проверяет физический диапазон. Возвращает { value }
+// или { error } с сообщением, понятным без знания кода.
+function readField(id, name, { min = -Infinity, max = Infinity, minOpen = false } = {}) {
     const el = document.getElementById(id);
-    if (!el) return NaN;
-    return parseFloat(el.value);
+    const value = el ? parseDecimal(el.value) : NaN;
+    if (!Number.isFinite(value)) {
+        return { error: `Проверьте: ${name} — введите число`, el };
+    }
+    const tooLow = minOpen ? value <= min : value < min;
+    if (tooLow || value > max) {
+        let range;
+        if (min !== -Infinity && max !== Infinity) range = `число от ${formatNumber(min, 0)} до ${formatNumber(max, 1).replace(/,0$/, '')}`;
+        else if (min !== -Infinity) range = minOpen ? `больше ${formatNumber(min, 0)}` : `не меньше ${formatNumber(min, 0)}`;
+        else range = `не больше ${formatNumber(max, 0)}`;
+        return { error: `Проверьте: ${name} — ${range}`, el };
+    }
+    return { value, el };
+}
+
+// Читает набор полей одного калькулятора. Неверное поле помечается
+// aria-invalid, чтобы его было видно и скринридеру, и глазу.
+function readFields(fields) {
+    const values = {};
+    let error = null;
+    fields.forEach(([key, id, name, opts]) => {
+        const r = readField(id, name, opts);
+        if (r.el) r.el.removeAttribute('aria-invalid');
+        if (error) return;
+        if (r.error) {
+            error = r.error;
+            if (r.el) r.el.setAttribute('aria-invalid', 'true');
+            return;
+        }
+        values[key] = r.value;
+    });
+    return { values, error };
 }
 
 function setResult(id, text, isError) {
     const el = document.getElementById(id);
     if (!el) return;
     el.textContent = text;
-    el.style.color = isError ? '#EF9A9A' : '';
+    el.classList.toggle('calc-result--error', !!isError);
 }
+
+const TOO_BIG = 'Проверьте: значения слишком велики для расчёта';
+const FRACTION = { min: 0, max: 1, minOpen: true };
+const POSITIVE = { min: 0, minOpen: true };
 
 const btnCalcVol = document.getElementById('btn-calc-vol');
 if (btnCalcVol) {
     btnCalcVol.addEventListener('click', () => {
-        const F = readNumber('calc-f');
-        const h = readNumber('calc-h');
-        const m = readNumber('calc-m');
-        const beta = readNumber('calc-beta');
-        const gamma = readNumber('calc-gamma');
-        const theta = readNumber('calc-theta');
-
-        const values = [F, h, m, beta, gamma, theta];
-        if (values.some(v => isNaN(v) || v < 0)) {
-            setResult('res-vol', 'Проверьте вводимые значения', true);
-            return;
-        }
+        const { values: v, error } = readFields([
+            ['F', 'calc-f', 'площадь', POSITIVE],
+            ['h', 'calc-h', 'толщина', POSITIVE],
+            ['m', 'calc-m', 'пористость (доли единицы)', FRACTION],
+            ['beta', 'calc-beta', 'нефтенасыщенность (доли единицы)', FRACTION],
+            ['gamma', 'calc-gamma', 'удельный вес нефти, г/см³', { min: 0, max: 1.5, minOpen: true }],
+            ['theta', 'calc-theta', 'пересчётный коэффициент (доли единицы)', FRACTION]
+        ]);
+        if (error) { setResult('res-vol', error, true); return; }
         // F в тыс. м², γ в г/см³ (≡ т/м³) → результат в тыс. т
-        const qn = F * h * m * beta * gamma * theta;
-        setResult('res-vol', Math.round(qn).toLocaleString('ru-RU') + ' тыс. т');
+        const qn = v.F * v.h * v.m * v.beta * v.gamma * v.theta;
+        if (!Number.isFinite(qn)) { setResult('res-vol', TOO_BIG, true); return; }
+        setResult('res-vol', formatNumber(Math.round(qn), 0) + ' тыс. т');
     });
 }
 
 const btnCalcApi = document.getElementById('btn-calc-api');
 if (btnCalcApi) {
     btnCalcApi.addEventListener('click', () => {
-        const api = readNumber('calc-api');
-        if (isNaN(api) || api <= -131.5) {
-            setResult('res-api', 'Проверьте значение API', true);
-            return;
-        }
-        const sg = 141.5 / (api + 131.5);
-        const density = sg * 1000;
-        setResult('res-api', density.toFixed(1) + ' кг/м³');
+        // Реальные нефти — от ~5 °API (битумы) до ~70 °API (конденсаты);
+        // 0–100 оставляет запас, но отсекает нефизичные значения вроде −131.
+        const { values: v, error } = readFields([
+            ['api', 'calc-api', 'плотность в °API', { min: 0, max: 100 }]
+        ]);
+        if (error) { setResult('res-api', error, true); return; }
+        const sg = 141.5 / (v.api + 131.5);
+        setResult('res-api', formatNumber(sg * 1000, 1) + ' кг/м³');
     });
 }
 
@@ -1016,20 +1114,23 @@ if (btnCalcApi) {
 const btnCalcDarcy = document.getElementById('btn-calc-darcy');
 if (btnCalcDarcy) {
     btnCalcDarcy.addEventListener('click', () => {
-        const k = readNumber('calc-k');        // мД
-        const h = readNumber('calc-dh');       // м
-        const dp = readNumber('calc-dp');      // МПа
-        const mu = readNumber('calc-mu');      // мПа·с
-        const rk = readNumber('calc-rk');      // м
-        const rc = readNumber('calc-rc');      // м
-
-        if ([k, h, dp, mu, rk, rc].some(v => isNaN(v) || v <= 0) || rk <= rc) {
-            setResult('res-darcy', 'Проверьте значения (Rк > rс, все > 0)', true);
+        const { values: v, error } = readFields([
+            ['k', 'calc-k', 'проницаемость', POSITIVE],          // мД
+            ['h', 'calc-dh', 'толщина пласта', POSITIVE],       // м
+            ['dp', 'calc-dp', 'депрессия', POSITIVE],           // МПа
+            ['mu', 'calc-mu', 'вязкость нефти', POSITIVE],      // мПа·с
+            ['rk', 'calc-rk', 'радиус контура питания', POSITIVE], // м
+            ['rc', 'calc-rc', 'радиус скважины', POSITIVE]       // м
+        ]);
+        if (error) { setResult('res-darcy', error, true); return; }
+        if (v.rk <= v.rc) {
+            setResult('res-darcy', 'Проверьте: радиус контура питания Rк должен быть больше радиуса скважины rс', true);
             return;
         }
         // Перевод единиц: мД → м² (9.869e-16), МПа → Па (1e6), мПа·с → Па·с (1e-3), сек → сут (86400)
-        const q = (2 * Math.PI * k * 9.869e-16 * h * dp * 1e6) / (mu * 1e-3 * Math.log(rk / rc)) * 86400;
-        setResult('res-darcy', q.toFixed(1) + ' м³/сут');
+        const q = (2 * Math.PI * v.k * 9.869e-16 * v.h * v.dp * 1e6) / (v.mu * 1e-3 * Math.log(v.rk / v.rc)) * 86400;
+        if (!Number.isFinite(q)) { setResult('res-darcy', TOO_BIG, true); return; }
+        setResult('res-darcy', formatNumber(q, 1) + ' м³/сут');
     });
 }
 
@@ -1046,15 +1147,14 @@ const UNIT_CONVERSIONS = {
 const btnCalcConvert = document.getElementById('btn-calc-convert');
 if (btnCalcConvert) {
     btnCalcConvert.addEventListener('click', () => {
-        const value = readNumber('calc-conv-value');
         const typeEl = document.getElementById('calc-conv-type');
         const conv = typeEl ? UNIT_CONVERSIONS[typeEl.value] : null;
-
-        if (isNaN(value) || !conv) {
-            setResult('res-convert', 'Проверьте вводимое значение', true);
-            return;
-        }
-        const result = value * conv.factor;
+        const { values: v, error } = readFields([
+            ['value', 'calc-conv-value', 'значение']
+        ]);
+        if (error || !conv) { setResult('res-convert', error || 'Проверьте: выберите направление перевода', true); return; }
+        const result = v.value * conv.factor;
+        if (!Number.isFinite(result)) { setResult('res-convert', TOO_BIG, true); return; }
         setResult('res-convert', result.toLocaleString('ru-RU', { maximumFractionDigits: 4 }) + ' ' + conv.label);
     });
 }

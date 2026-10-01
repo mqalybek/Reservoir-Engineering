@@ -85,30 +85,30 @@
                     <p class="calc-formula">Q<sub>н</sub> = F · h · m · β<sub>н</sub> · γ<sub>н</sub> · θ</p>
                     <div class="form-group">
                         <label for="calc-f">Площадь (F), тыс. м²</label>
-                        <input type="number" id="calc-f" value="1000">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-f" value="1000">
                     </div>
                     <div class="form-group">
                         <label for="calc-h">Толщина (h), м</label>
-                        <input type="number" id="calc-h" value="10">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-h" value="10">
                     </div>
                     <div class="form-group">
                         <label for="calc-m">Пористость (m), доли единиц</label>
-                        <input type="number" id="calc-m" value="0.20" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-m" value="0,20">
                     </div>
                     <div class="form-group">
                         <label for="calc-beta">Нефтенасыщенность (βн), доли</label>
-                        <input type="number" id="calc-beta" value="0.75" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-beta" value="0,75">
                     </div>
                     <div class="form-group">
                         <label for="calc-gamma">Удельный вес (γн), г/см³</label>
-                        <input type="number" id="calc-gamma" value="0.85" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-gamma" value="0,85">
                     </div>
                     <div class="form-group">
                         <label for="calc-theta">Пересчетный коэфф. (θ), доли</label>
-                        <input type="number" id="calc-theta" value="0.95" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-theta" value="0,95">
                     </div>
                     <button class="btn btn--outline" id="btn-calc-vol" style="width:100%; margin-top:1rem;">Рассчитать (Qн)</button>
-                    <div class="calc-result" id="res-vol">0 тыс. т</div>
+                    <div class="calc-result" aria-live="polite" id="res-vol">0 тыс. т</div>
                 </div>
 
                 <!-- Конвертер API -->
@@ -118,10 +118,10 @@
                     <p class="calc-formula">ρ = 141,5 / (°API + 131,5) · 1000</p>
                     <div class="form-group">
                         <label for="calc-api">API Gravity, °API</label>
-                        <input type="number" id="calc-api" value="35">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-api" value="35">
                     </div>
                     <button class="btn btn--outline" id="btn-calc-api" style="width:100%; margin-top:1rem;">Конвертировать</button>
-                    <div class="calc-result" id="res-api">0 кг/м³</div>
+                    <div class="calc-result" aria-live="polite" id="res-api">0 кг/м³</div>
                 </div>
 
                 <!-- Дебит по Дюпюи -->
@@ -131,30 +131,30 @@
                     <p class="calc-formula">Q = 2πkh·ΔP / (μ · ln(R<sub>к</sub>/r<sub>с</sub>))</p>
                     <div class="form-group">
                         <label for="calc-k">Проницаемость (k), мД</label>
-                        <input type="number" id="calc-k" value="100" min="0">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-k" value="100">
                     </div>
                     <div class="form-group">
                         <label for="calc-dh">Толщина пласта (h), м</label>
-                        <input type="number" id="calc-dh" value="10" min="0">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-dh" value="10">
                     </div>
                     <div class="form-group">
                         <label for="calc-dp">Депрессия (ΔP), МПа</label>
-                        <input type="number" id="calc-dp" value="5" min="0" step="0.1">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-dp" value="5">
                     </div>
                     <div class="form-group">
                         <label for="calc-mu">Вязкость нефти (μ), мПа·с</label>
-                        <input type="number" id="calc-mu" value="2" min="0" step="0.1">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-mu" value="2">
                     </div>
                     <div class="form-group">
                         <label for="calc-rk">Радиус контура питания (Rк), м</label>
-                        <input type="number" id="calc-rk" value="250" min="0">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-rk" value="250">
                     </div>
                     <div class="form-group">
                         <label for="calc-rc">Радиус скважины (rс), м</label>
-                        <input type="number" id="calc-rc" value="0.1" min="0" step="0.01">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-rc" value="0,1">
                     </div>
                     <button class="btn btn--outline" id="btn-calc-darcy" style="width:100%; margin-top:1rem;">Рассчитать (Q)</button>
-                    <div class="calc-result" id="res-darcy">0 м³/сут</div>
+                    <div class="calc-result" aria-live="polite" id="res-darcy">0 м³/сут</div>
                 </div>
 
                 <!-- Конвертер единиц -->
@@ -174,10 +174,10 @@
                     </div>
                     <div class="form-group">
                         <label for="calc-conv-value">Значение</label>
-                        <input type="number" id="calc-conv-value" value="1000">
+                        <input type="text" inputmode="decimal" autocomplete="off" spellcheck="false" id="calc-conv-value" value="1000">
                     </div>
                     <button class="btn btn--outline" id="btn-calc-convert" style="width:100%; margin-top:1rem;">Конвертировать</button>
-                    <div class="calc-result" id="res-convert">—</div>
+                    <div class="calc-result" aria-live="polite" id="res-convert">—</div>
                 </div>
             </div>
         </div>
